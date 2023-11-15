@@ -92,7 +92,7 @@ export default function PostDetailPage() {
 
               <div className="flex flex-col">
                 <div>
-                  <h1>User name</h1>
+                  <h1 className="font-bold">User name</h1>
                 </div>
                 <div>
                   <h1>comment</h1>
@@ -102,9 +102,32 @@ export default function PostDetailPage() {
           </div>
 
           {/* BOX-RIGHT */}
-          <div className="w-4/5 bg-red-500">
-            <div>1</div>
-            <div>2</div>
+          <div className="w-4/5">
+            <div className="border-2 border-slate-400 flex justify-center items-center p-3">
+              <div className="w-1/4 flex flex-col justify-start items-start ml-2">
+                <div>
+                  <h1>user name</h1>
+                </div>
+
+                <div>
+                  <Avatar size="60px" />
+                </div>
+              </div>
+
+              <div className="w-3/4 flex flex-col gap-2">
+                <div>
+                  <h1>by user name</h1>
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    className="w-[250px] text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
+                  >
+                    Follow
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

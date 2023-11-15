@@ -5,6 +5,8 @@ import LoginPage from "../pages/LoginPage";
 import RejisterPage from "../pages/RejisterPage";
 import PostDetailPage from "../pages/PostDetailPage";
 import TagPage from "../pages/TagPage";
+import ProfilePage from "../pages/ProfilePage";
+import CreatePostPage from "../pages/CreatePostPage";
 
 const router = createBrowserRouter([
   {
@@ -12,7 +14,9 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <HomePage /> },
       { path: "/postDetailPage", element: <PostDetailPage /> },
-      { path: "/tagPage", element: <TagPage /> }
+      { path: "/tagPage", element: <TagPage /> },
+      { path: "/profilePage", element: <ProfilePage /> },
+      { path: "/createPostPage", element: <CreatePostPage /> }
     ]
   },
   { path: "/loginPage", element: <LoginPage /> },

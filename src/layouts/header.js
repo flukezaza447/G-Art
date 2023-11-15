@@ -33,10 +33,7 @@ export default function Header() {
                   fill="none"
                   viewBox="0 0 20 20"
                 >
-                  <path
-                    stroke="currentColor"
-                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                  />
+                  <path d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                 </svg>
               </div>
               <input
@@ -51,7 +48,7 @@ export default function Header() {
         </div>
 
         {/* BOX-2 right */}
-        <div className="w-1/4 flex justify-center items-center gap-4 ">
+        {/* <div className="w-1/4 flex justify-center items-center gap-4 ">
           <Link to="/loginPage">
             <button
               type="button"
@@ -69,9 +66,9 @@ export default function Header() {
               Sign up
             </button>
           </Link>
-        </div>
+        </div> */}
 
-        {/* <DropdownProfile /> */}
+        <DropdownProfile />
       </nav>
     </div>
   );
