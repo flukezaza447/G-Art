@@ -7,6 +7,7 @@ import PostDetailPage from "../pages/PostDetailPage";
 import TagPage from "../pages/TagPage";
 import ProfilePage from "../pages/ProfilePage";
 import CreatePostPage from "../pages/CreatePostPage";
+import EditProfilePage from "../pages/EditProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -16,7 +17,8 @@ const router = createBrowserRouter([
       { path: "/postDetailPage", element: <PostDetailPage /> },
       { path: "/tagPage", element: <TagPage /> },
       { path: "/profilePage", element: <ProfilePage /> },
-      { path: "/createPostPage", element: <CreatePostPage /> }
+      { path: "/createPostPage", element: <CreatePostPage /> },
+      { path: "/editProfilePage", element: <EditProfilePage /> }
     ]
   },
   { path: "/loginPage", element: <LoginPage /> },

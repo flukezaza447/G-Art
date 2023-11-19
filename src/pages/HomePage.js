@@ -9,14 +9,22 @@ export default function HomePage() {
       </div>
       {/* BOX2-CENTER */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 z-0">
-        <div className="p-2">
+        <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
           <Link to="/postDetailPage">
             <img
-              className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
+              className="rounded-t-lg"
               src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
               alt=""
             />
           </Link>
+          <div className="p-5">
+            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              nameImage
+            </h5>
+            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+              description
+            </p>
+          </div>
         </div>
 
         <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -28,11 +36,63 @@ export default function HomePage() {
             />
           </Link>
           <div className="p-5">
-            <a href="#">
-              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                nameImage
-              </h5>
-            </a>
+            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              nameImage
+            </h5>
+            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+              description
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+          <Link to="/postDetailPage">
+            <img
+              className="rounded-t-lg"
+              src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
+              alt=""
+            />
+          </Link>
+          <div className="p-5">
+            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              nameImage
+            </h5>
+            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+              description
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+          <Link to="/postDetailPage">
+            <img
+              className="rounded-t-lg"
+              src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
+              alt=""
+            />
+          </Link>
+          <div className="p-5">
+            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              nameImage
+            </h5>
+            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+              description
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+          <Link to="/postDetailPage">
+            <img
+              className="rounded-t-lg"
+              src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
+              alt=""
+            />
+          </Link>
+          <div className="p-5">
+            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              nameImage
+            </h5>
             <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
               description
             </p>

@@ -125,6 +125,12 @@ export default function PostDetailPage() {
                   >
                     Follow
                   </button>
+                  <button
+                    type="button"
+                    className="w-[250px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
+                  >
+                    Already followed
+                  </button>
                 </div>
               </div>
             </div>

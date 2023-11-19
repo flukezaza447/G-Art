@@ -48,7 +48,7 @@ export default function Header() {
         </div>
 
         {/* BOX-2 right */}
-        {/* <div className="w-1/4 flex justify-center items-center gap-4 ">
+        <div className="w-1/4 flex justify-center items-center gap-4 ">
           <Link to="/loginPage">
             <button
               type="button"
@@ -66,9 +66,9 @@ export default function Header() {
               Sign up
             </button>
           </Link>
-        </div> */}
+        </div>
 
-        <DropdownProfile />
+        {/* <DropdownProfile /> */}
       </nav>
     </div>
   );
