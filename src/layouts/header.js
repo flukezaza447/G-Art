@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import DropdownProfile from "./DropdownProfile";
+import useAuth from "../hooks/useAuth";
 
 export default function Header() {
+  const { logout, authenticateUser } = useAuth();
+  console.log("authenticateUser:", authenticateUser);
   return (
     <div className="border border-b-slate-200">
       <nav className="flex bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900">
@@ -48,27 +51,30 @@ export default function Header() {
         </div>
 
         {/* BOX-2 right */}
-        <div className="w-1/4 flex justify-center items-center gap-4 ">
-          <Link to="/loginPage">
-            <button
-              type="button"
-              className="text-back border border-slate-950 hover:bg-gray-200 focus:outline-none focus:ring-0 rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
-            >
-              Log in
-            </button>
-          </Link>
 
-          <Link to="/rejisterPage">
-            <button
-              type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-0 rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              Sign up
-            </button>
-          </Link>
-        </div>
+        {authenticateUser ? (
+          <DropdownProfile />
+        ) : (
+          <div className="w-1/4 flex justify-center items-center gap-4 ">
+            <Link to="/loginPage">
+              <button
+                type="button"
+                className="text-back border border-slate-950 hover:bg-gray-200 focus:outline-none focus:ring-0 rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2"
+              >
+                Log in
+              </button>
+            </Link>
 
-        {/* <DropdownProfile /> */}
+            <Link to="/rejisterPage">
+              <button
+                type="button"
+                className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-0 rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Sign up
+              </button>
+            </Link>
+          </div>
+        )}
       </nav>
     </div>
   );

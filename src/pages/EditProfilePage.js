@@ -1,8 +1,10 @@
 import { useRef, useState } from "react";
 import Avatar from "../components/Avatar";
+import useAuth from "../hooks/useAuth";
 
 export default function CreatePostPage() {
   const inputEl = useRef();
+  const { authenticateUser } = useAuth();
 
   const [selectedMenu, setSelectedMenu] = useState("Basicinformation");
   // console.log("selectedMenu:", selectedMenu);
@@ -67,7 +69,7 @@ export default function CreatePostPage() {
                       type="text"
                       id="first_name"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="First name"
+                      placeholder={authenticateUser.firstName}
                       required
                     />
                   </div>
@@ -83,7 +85,7 @@ export default function CreatePostPage() {
                       type="text"
                       id="Last_name"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="First name"
+                      placeholder={authenticateUser.lastName}
                       required
                     />
                   </div>
@@ -99,7 +101,7 @@ export default function CreatePostPage() {
                       type="text"
                       id="Email"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Email"
+                      placeholder={authenticateUser.email}
                       required
                     />
                   </div>
@@ -115,7 +117,7 @@ export default function CreatePostPage() {
                       type="text"
                       id="Phone number"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Email"
+                      placeholder={authenticateUser.mobile}
                       required
                     />
                   </div>

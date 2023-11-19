@@ -1,19 +1,31 @@
 import { AiOutlineMail, AiFillLock } from "react-icons/ai";
 import Input from "../components/Input";
 import { useState } from "react";
-
-const initiaInput = {
-  email: "",
-  password: ""
-};
+import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
-  const [input, setInput] = useState(initiaInput);
-  console.log("input:", input);
+  const { userLogin } = useAuth();
 
-  const handleChangeInput = e => {
-    setInput({ ...input, [e.target.name]: e.target.value });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleSubmitForm = async e => {
+    try {
+      e.preventDefault();
+      await userLogin(email, password);
+      navigate("/");
+
+      toast.success("login success");
+    } catch (err) {
+      console.log(err);
+      toast.error(err.response?.data.message);
+    }
   };
+
   return (
     <div className="fixed inset-0 bg-red-200 backdrop-blur-sm flex justify-center items-center">
       <div className="relative w-[400px] h-full max-w-md md:h-auto">
@@ -23,13 +35,13 @@ export default function LoginPage() {
               Sign in
             </h3>
 
-            <form className="space-y-6" action="#">
+            <form className="space-y-6" action="#" onSubmit={handleSubmitForm}>
               <div>
                 <Input
                   type="email"
                   name="email"
-                  value={input.email}
-                  onChange={handleChangeInput}
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   titleLabel="Email"
                   icon={<AiOutlineMail />}
                 />
@@ -39,8 +51,8 @@ export default function LoginPage() {
                 <Input
                   type="password"
                   name="password"
-                  value={input.password}
-                  onChange={handleChangeInput}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                   titleLabel="password"
                   icon={<AiFillLock />}
                 />

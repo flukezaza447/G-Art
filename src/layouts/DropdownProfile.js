@@ -3,8 +3,24 @@ import PictureUser from "../assets/blank.png";
 import { FaHouseUser } from "react-icons/fa";
 import { FaBell } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { MdLogout } from "react-icons/md";
+import useAuth from "../hooks/useAuth";
+import { useRef, useState } from "react";
+import Avatar from "../components/Avatar";
 
 export default function DropdownProfile() {
+  const { logout, authenticateUser } = useAuth();
+  console.log("authenticateUser:", authenticateUser);
+
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef();
+  const imgRef = useRef();
+
+  window.addEventListener("click", e => {
+    if (e.target !== menuRef.current && e.target !== imgRef.current) {
+      setOpen(false);
+    }
+  });
   return (
     <div className="flex w-4/12 justify-end items-center gap-4">
       {/* BOX-left */}
@@ -21,47 +37,72 @@ export default function DropdownProfile() {
       </div>
 
       {/* BOX-right */}
-      <div>
-        <img
-          id="avatarButton"
-          type="button"
-          data-dropdown-toggle="userDropdown"
-          data-dropdown-placement="bottom-start"
-          className="w-10 h-10 rounded-full cursor-pointer"
-          src={PictureUser}
-          alt="User dropdown"
-        />
+      <div className="relative">
+        {authenticateUser ? (
+          <img
+            ref={imgRef}
+            type="button"
+            className="w-10 h-10 rounded-full cursor-pointer"
+            src={authenticateUser.profileImage || PictureUser}
+            alt="User dropdown"
+            onClick={() => setOpen(!open)}
+          />
+        ) : (
+          <img
+            ref={imgRef}
+            type="button"
+            className="w-10 h-10 rounded-full cursor-pointer"
+            src={PictureUser}
+            alt="User dropdown"
+            onClick={() => setOpen(!open)}
+          />
+        )}
 
-        <div
-          id="userDropdown"
-          className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
-        >
-          <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-            <div>Bonnie Green</div>
-            <div className="font-medium truncate">name@flowbite.com</div>
-          </div>
-          <ul
-            className="py-2 text-sm text-gray-700 dark:text-gray-200"
-            aria-labelledby="avatarButton"
+        {open && (
+          <div
+            ref={menuRef}
+            className="absolute z-10 -left-40 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
           >
-            <li>
-              <Link
-                to="/profilePage"
-                className="flex items-center gap-3 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+            <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+              <span className="block text-sm text-gray-900 dark:text-white">
+                {authenticateUser.firstName} {authenticateUser.lastName}
+              </span>
+              <div className="font-medium truncate">
+                {" "}
+                <span className="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
+                  {authenticateUser.email}
+                </span>
+              </div>
+            </div>
+            <ul
+              className="py-2 text-sm text-gray-700 dark:text-gray-200"
+              aria-labelledby="avatarButton"
+            >
+              <li onClick={() => setOpen(false)}>
+                <Link
+                  to="/profilePage"
+                  className="flex items-center gap-3 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                >
+                  <i>
+                    <FaHouseUser />
+                  </i>
+                  <p>บัญชีผู้ใช้</p>
+                </Link>
+              </li>
+            </ul>
+            <div className="py-1">
+              <button
+                onClick={logout}
+                className="w-full flex items-center gap-3 block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >
                 <i>
-                  <FaHouseUser />
+                  <MdLogout />
                 </i>
-                <p>บัญชีผู้ใช้</p>
-              </Link>
-            </li>
-          </ul>
-          <div className="py-1">
-            <Link className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-              ออกจากระบบ
-            </Link>
+                <p>ออกจากระบบ</p>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

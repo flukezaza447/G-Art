@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import Avatar from "../components/Avatar";
+import useAuth from "../hooks/useAuth";
 
 export default function ProfilePage() {
+  const { authenticateUser } = useAuth();
   return (
     <>
       <div>
@@ -17,11 +19,18 @@ export default function ProfilePage() {
           <div className="w-2/4 flex flex-col items-center">
             <div className="w-2/4 border-2 border-slate-400 bg-white flex flex-col items-center justify-center p-4">
               <div>
-                <Avatar size="70px" />
+                {authenticateUser ? (
+                  <Avatar src={authenticateUser.profileImage} size="70px" />
+                ) : (
+                  <Avatar size="70px" />
+                )}
               </div>
 
               <div className="flex flex-col justify-center items-center gap-4">
-                <h1 className="text-xl font-bold">User name</h1>
+                <h1 className="text-xl font-bold">
+                  {" "}
+                  {authenticateUser.firstName} {authenticateUser.lastName}
+                </h1>
 
                 <Link to="/editProfilePage">
                   <button

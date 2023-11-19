@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { AiOutlineMail, AiFillLock, AiOutlineUser } from "react-icons/ai";
 import validateRegister from "../validators/validate-register";
+import { toast } from "react-toastify";
 import Input from "../components/Input";
+import * as authApi from "../apis/auth-api";
+import useLoading from "../hooks/useLoading";
 
 const initiaInput = {
   firstName: "",
@@ -17,6 +20,8 @@ export default function LoginPage() {
 
   const [error, setError] = useState({});
 
+  const { startLoading, stopLoading } = useLoading();
+
   const handleChangeInput = e => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
@@ -25,13 +30,21 @@ export default function LoginPage() {
     try {
       e.preventDefault();
       const result = validateRegister(input);
-      console.log("result:", result);
       if (result) {
         setError(result);
+      } else {
+        setError({});
+        // console.log("inputData:", input);
+        startLoading();
+        await authApi.register(input);
+        setInput(initiaInput);
+        toast.success("sucess register. please login to continue");
       }
     } catch (err) {
       // console.log(err, "err");
-      // toast.error(err.response?.data.message);
+      toast.error(err.response?.data.message);
+    } finally {
+      stopLoading();
     }
   };
 
