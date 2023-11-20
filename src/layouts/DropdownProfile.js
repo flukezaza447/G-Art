@@ -6,11 +6,10 @@ import { Link } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
 import useAuth from "../hooks/useAuth";
 import { useRef, useState } from "react";
-import Avatar from "../components/Avatar";
 
 export default function DropdownProfile() {
   const { logout, authenticateUser } = useAuth();
-  console.log("authenticateUser:", authenticateUser);
+  // console.log("authenticateUser:", authenticateUser);
 
   const [open, setOpen] = useState(false);
   const menuRef = useRef();

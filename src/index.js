@@ -5,13 +5,16 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import AuthContextProvider from "./contexts/AuthContext";
 import LoadingContextProvider from "./contexts/LoadingContext";
+import PostContextProvider, { PostContext } from "./contexts/PostContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <LoadingContextProvider>
       <AuthContextProvider>
-        <App />
+        <PostContextProvider>
+          <App />
+        </PostContextProvider>
       </AuthContextProvider>
     </LoadingContextProvider>
   </React.StrictMode>
