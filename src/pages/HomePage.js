@@ -15,8 +15,11 @@ export default function HomePage() {
         {postData.map((el, idx) => {
           const postImage = JSON.parse(el.image);
           return (
-            <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-              <Link to="/postDetailPage">
+            <div
+              key={idx}
+              className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            >
+              <Link to={`/postDetailPage/${el.id}`}>
                 <img className="rounded-t-lg" src={postImage} alt="" />
               </Link>
               <div className="p-5">

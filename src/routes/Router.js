@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "/", element: <HomePage /> },
-      { path: "/postDetailPage", element: <PostDetailPage /> },
+      { path: "/postDetailPage/:postId", element: <PostDetailPage /> },
       { path: "/tagPage", element: <TagPage /> },
       { path: "/profilePage", element: <ProfilePage /> },
       { path: "/createPostPage", element: <CreatePostPage /> },

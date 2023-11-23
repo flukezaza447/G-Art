@@ -1,6 +1,9 @@
+import { useParams } from "react-router-dom";
 import Avatar from "../components/Avatar";
 
 export default function PostDetailPage() {
+  const { postId } = useParams();
+  // console.log("postId:", postId);
   return (
     <div className="h-screen flex">
       {/* BOX-1-left */}

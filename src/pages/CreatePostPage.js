@@ -3,13 +3,18 @@ import { BsFillEyeFill } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import boxIcon from "../public/pics/boxIcon.png";
 import docIcon from "../public/pics/docIcon.png";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
+import { getDataTag } from "../apis/tag-api";
+import { CreatePost } from "../apis/post-api";
 import Modal from "../components/modal/Modal";
+import useLoading from "../hooks/useLoading";
 
 export default function CreatePostPage() {
   const inputImg = useRef();
 
-  const imageTypes = ["image/png", "image/jpeg", "image/svg+xml"];
+  const { startLoading, stopLoading } = useLoading();
+
+  const imageTypes = ["image/png", "image/jpeg"];
 
   const [arrayImage, setArrayImage] = useState([]);
   console.log("arrayImage;", arrayImage);
@@ -17,6 +22,37 @@ export default function CreatePostPage() {
   const [arrayImageURL, setArrayImageURL] = useState([]);
 
   const [showViewImageModal, setShowViewImageModal] = useState(false);
+
+  const [input, setInput] = useState({
+    title: "",
+    description: "",
+    tagId: ""
+  });
+  console.log("inputData:", input);
+
+  const handleChangeInput = e => {
+    const { name, value } = e.target;
+    setInput(prevInput => ({
+      ...prevInput,
+      [name]: value
+    }));
+  };
+
+  // const handleChangeInput = e => {
+  //   setInput({ ...input, [e.target.name]: e.target.value });
+  // };
+
+  const [dataTag, setDataTag] = useState([]);
+  console.log("dataTag:", dataTag);
+
+  useEffect(() => {
+    const fetchTagData = async () => {
+      const res = await getDataTag();
+      setDataTag(res.data.tags);
+      // console.log("res.data", res.data);
+    };
+    fetchTagData();
+  }, []);
 
   const handleImageChange = e => {
     const fileList = e.target.files;
@@ -76,6 +112,38 @@ export default function CreatePostPage() {
     console.log(newImageUrls);
     setArrayImageURL(newImageUrls);
   }, [arrayImage]);
+
+  const handleSubmitForm = async e => {
+    try {
+      startLoading();
+
+      let formData = new FormData();
+
+      formData.append("title", input.title);
+      formData.append("description", input.description);
+      formData.append("tagId", input.categoryId);
+
+      for (let i = 0; i < arrayImage.length; i++) {
+        formData.append("roomImage", arrayImage[i]);
+      }
+
+      console.log("title:", formData.getAll("title"));
+      console.log("description:", formData.get("description"));
+      console.log("tagId:", formData.get("tagId"));
+
+      // await CreatePost(formData);
+
+      // setInput({
+      //   title: "",
+      //   description: "",
+      //   tagId: ""
+      // });
+      setArrayImage(null);
+      stopLoading();
+    } catch (err) {
+      console.log("Create Error", err);
+    }
+  };
 
   return (
     <div className="w-full bg-red-200 flex justify-center items-center p-2">
@@ -162,52 +230,61 @@ export default function CreatePostPage() {
               ))}
             </div>
           </Modal>
-          <ToastContainer />
+          {/* <ToastContainer /> */}
         </div>
 
         <div className="w-full flex justify-center items-center p-2 mb-10">
           <div className="w-2/5">
             <div className="mb-6">
               <label
-                for="base-input"
+                htmlFor="base-input"
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >
                 Name
               </label>
               <input
                 type="text"
-                id="base-input"
+                name="title"
                 className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={handleChangeInput}
+                value={input.title}
               />
             </div>
-
             <div className="mb-6">
               <label
-                for="base-input"
+                htmlFor="base-input"
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >
                 Description
               </label>
               <input
                 type="text"
-                id="base-input"
+                name="description"
                 className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={handleChangeInput}
+                value={input.description}
               />
             </div>
-
             <label
-              for="countries"
+              htmlFor="countries"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
               Tag
             </label>
+
             <select
               id="countries"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              name="tagId"
+              onChange={handleChangeInput}
+              value={input.tagId}
             >
-              <option>Tag1</option>
-              <option>Tag2</option>
-              <option>Tag3</option>
+              <option value="">กรุณาเลือก</option>
+              {dataTag.map((el, idx) => (
+                <option key={idx} value={el.id}>
+                  {el.TagName}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -216,6 +293,7 @@ export default function CreatePostPage() {
           <button
             type="button"
             className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            onClick={handleSubmitForm}
           >
             ยืนยัน
           </button>

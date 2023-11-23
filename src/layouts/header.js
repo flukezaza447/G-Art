@@ -4,7 +4,7 @@ import useAuth from "../hooks/useAuth";
 
 export default function Header() {
   const { logout, authenticateUser } = useAuth();
-  console.log("authenticateUser:", authenticateUser);
+  // console.log("authenticateUser:", authenticateUser);
   return (
     <div className="border border-b-slate-200">
       <nav className="flex bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900">
