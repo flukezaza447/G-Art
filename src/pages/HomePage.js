@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import usePost from "../hooks/usePost";
 export default function HomePage() {
   const { postData } = usePost();
-  console.log("postData:", postData);
+  // console.log("postData:", postData);
 
   return (
     <div className="relative">
@@ -19,9 +19,11 @@ export default function HomePage() {
               key={idx}
               className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
             >
-              <Link to={`/postDetailPage/${el.id}`}>
-                <img className="rounded-t-lg" src={postImage} alt="" />
-              </Link>
+              <div>
+                <Link to={`/postDetailPage/${el.id}`}>
+                  <img className="rounded-t-lg" src={postImage} alt="" />
+                </Link>
+              </div>
               <div className="p-5">
                 <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                   {el.title}

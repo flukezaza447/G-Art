@@ -5,7 +5,7 @@ export const PostContext = createContext();
 
 export default function PostContextProvider({ children }) {
   const [postData, setPostData] = useState([]);
-  //   console.log("postData:", postData);
+  // console.log("postData:", postData);
 
   useEffect(() => {
     const fetchCreateRoom = async () => {

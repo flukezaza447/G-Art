@@ -8,20 +8,24 @@ import { getDataTag } from "../apis/tag-api";
 import { CreatePost } from "../apis/post-api";
 import Modal from "../components/modal/Modal";
 import useLoading from "../hooks/useLoading";
+import useAuth from "../hooks/useAuth";
+import ModalSuccess from "../components/modal/ModalSuccess";
 
 export default function CreatePostPage() {
   const inputImg = useRef();
+
+  const { authenticateUser } = useAuth();
 
   const { startLoading, stopLoading } = useLoading();
 
   const imageTypes = ["image/png", "image/jpeg"];
 
   const [arrayImage, setArrayImage] = useState([]);
-  console.log("arrayImage;", arrayImage);
 
   const [arrayImageURL, setArrayImageURL] = useState([]);
 
   const [showViewImageModal, setShowViewImageModal] = useState(false);
+  const [showModalSuccess, setShowModalSuccess] = useState(false);
 
   const [input, setInput] = useState({
     title: "",
@@ -59,7 +63,7 @@ export default function CreatePostPage() {
     console.log("fileList:", fileList);
 
     const cloneFile = [...arrayImage];
-    console.log("cloneFile:", cloneFile);
+    // console.log("cloneFile:", cloneFile);
 
     for (let i = 0; i < fileList.length; i++) {
       if (!imageTypes.includes(fileList[i].type)) {
@@ -86,6 +90,7 @@ export default function CreatePostPage() {
         });
       } else {
         cloneFile.push({ image: fileList[i] });
+        // cloneFile.push(fileList[i]);
       }
     }
     setArrayImage(cloneFile);
@@ -109,11 +114,11 @@ export default function CreatePostPage() {
         newImageUrls.push(URL.createObjectURL(img.image));
       }
     });
-    console.log(newImageUrls);
+    // console.log("newImageUrls:", newImageUrls);
     setArrayImageURL(newImageUrls);
   }, [arrayImage]);
 
-  const handleSubmitForm = async e => {
+  const handleSubmitForm = async () => {
     try {
       startLoading();
 
@@ -121,25 +126,32 @@ export default function CreatePostPage() {
 
       formData.append("title", input.title);
       formData.append("description", input.description);
-      formData.append("tagId", input.categoryId);
+      formData.append("tagId", input.tagId);
+      formData.append("userId", authenticateUser.id);
+      // formData.append("image", arrayImage[0].image);
 
       for (let i = 0; i < arrayImage.length; i++) {
-        formData.append("roomImage", arrayImage[i]);
+        console.log("arrayImage:", arrayImage);
+        formData.append("image", arrayImage[i].image);
       }
 
+      console.log("arrayImage:", arrayImage[0].image);
       console.log("title:", formData.getAll("title"));
+      console.log("image:", formData.getAll("image"));
       console.log("description:", formData.get("description"));
       console.log("tagId:", formData.get("tagId"));
+      console.log("userId:", formData.get("userId"));
 
-      // await CreatePost(formData);
+      await CreatePost(formData);
 
-      // setInput({
-      //   title: "",
-      //   description: "",
-      //   tagId: ""
-      // });
-      setArrayImage(null);
+      setInput({
+        title: "",
+        description: "",
+        tagId: ""
+      });
+      setArrayImage([]);
       stopLoading();
+      setShowModalSuccess(true);
     } catch (err) {
       console.log("Create Error", err);
     }
@@ -305,6 +317,8 @@ export default function CreatePostPage() {
             ยกเลิก
           </button>
         </div>
+
+        {showModalSuccess && <ModalSuccess urlPath="/" />}
       </div>
     </div>
   );
