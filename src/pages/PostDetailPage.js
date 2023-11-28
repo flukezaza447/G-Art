@@ -1,29 +1,38 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Avatar from "../components/Avatar";
 import usePost from "../hooks/usePost";
 import useAuth from "../hooks/useAuth";
 import { useState } from "react";
 import { getPostImageById } from "../apis/post-api";
+import { getUserInfoById } from "../apis/user-api";
+import { requestFollow, deleteFollow } from "../apis/follow-api";
 import { useEffect } from "react";
+import { BiSolidLike } from "react-icons/bi";
+import { FaCommentAlt } from "react-icons/fa";
+import ModalConfirmSave from "../components/modal/ModalConfirmSave";
 
 export default function PostDetailPage() {
   const { postId } = useParams();
   // console.log("postId:", postId);
 
+  const navigate = useNavigate();
+
+  const [showModalConfirm, setShowModalConfirm] = useState(false);
+
   const [postImageId, setPostImageId] = useState([]);
-  console.log("postImageId:", postImageId);
+  // console.log("postImageId:", postImageId);
+
+  const parsePostImageId = postImageId?.map(el => JSON.parse(el.image));
+  console.log("parsePostImageId:", parsePostImageId);
 
   const { postData } = usePost();
   // console.log("postData:", postData);
 
   const { authenticateUser } = useAuth();
-  console.log("authenticateUser:", authenticateUser);
+  // console.log("authenticateUser:", authenticateUser);
 
-  const selectedPostData = postData.find(el => el.id === +postId);
-  console.log("selectedPostData:", selectedPostData);
-
-  const postImage = JSON.parse(selectedPostData?.image);
-  // console.log("postImage:", postImage);
+  const selectedPostData = postData?.find(el => el?.id === +postId);
+  // console.log("selectedPostData:", selectedPostData);
 
   const userId = selectedPostData?.User?.id;
   // console.log("userId:", userId);
@@ -31,46 +40,84 @@ export default function PostDetailPage() {
   useEffect(() => {
     const fetchPostImageById = async () => {
       const res = await getPostImageById(userId);
-      setPostImageId(res.data.postImageById);
+      setPostImageId(res?.data?.postImageById);
     };
     fetchPostImageById();
   }, []);
 
-  const parsePostImageId = postImageId.map(el => JSON.parse(el.image));
-  // console.log("parsePostImageId:", parsePostImageId);
+  const [userFollowById, setuserFollowById] = useState([]);
+  const isFollowing = userFollowById?.userFollows
+    ? userFollowById?.userFollows.some(
+        follow => follow?.Requester?.id === authenticateUser?.id
+      )
+    : false;
+
+  useEffect(() => {
+    const fetchUserFollowById = async () => {
+      const res = await getUserInfoById(userId);
+      setuserFollowById(res?.data);
+      // console.log("red.data", res.data);
+    };
+    fetchUserFollowById();
+  }, []);
+
+  const handleClickFollow = async () => {
+    try {
+      if (!authenticateUser) {
+        navigate("/loginPage");
+      }
+      await requestFollow(userId);
+      navigate(0);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleClickReject = async () => {
+    await deleteFollow(userId);
+  };
 
   return (
-    <div className="h-screen flex">
+    <div className="flex mb-20">
       {/* BOX-1-left */}
+
       <div className="w-4/5 flex flex-col justify-start items-center gap-10 mt-6">
         {/* row-1-TOP */}
-        <div className="w-4/5">
+        <div className="w-4/5 flex flex-col gap-5">
           <div>
             <img
               className="w-full h-[400px] rounded-lg cursor-pointer"
-              src={postImage}
+              src={
+                selectedPostData?.image
+                  ? JSON.parse(selectedPostData.image)[0]
+                  : ""
+              }
               alt=""
             />
+          </div>
+          <div className="flex items-center gap-2 ">
+            <BiSolidLike />
+            <p>22s</p>
           </div>
         </div>
 
         {/* row-2-BOTTOM */}
         <div className="w-4/5 flex gap-6">
           {/* BOX-LEFT */}
-          <div className="w-4/5 flex flex-col items-center justify-center gap-4">
+          <div className="w-4/5 flex flex-col items-center justify-start gap-4">
             {/* check login */}
             {authenticateUser ? (
               <div className="w-full flex items-center gap-4">
                 <div>
-                  <Avatar size="60px" />
+                  <Avatar src={authenticateUser.profileImage} size="60px" />
                 </div>
 
                 <div className="w-full flex flex-col">
                   <label
-                    for="message"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    htmlFor="message"
+                    className="block mb-2 text-lg font-medium text-gray-900 dark:text-white"
                   >
-                    Your message
+                    Comment
                   </label>
                   <textarea
                     id="message"
@@ -164,7 +211,7 @@ export default function PostDetailPage() {
 
           {/* BOX-RIGHT */}
           <div className="w-4/5">
-            {authenticateUser.id === userId ? null : (
+            {authenticateUser && authenticateUser?.id === userId ? null : (
               <div className="border-2 border-slate-400 flex justify-center items-center p-3">
                 <div className="w-1/4 flex flex-col justify-start items-start ml-2">
                   <div>
@@ -173,52 +220,124 @@ export default function PostDetailPage() {
 
                   <div>
                     <Avatar
-                      src={selectedPostData.User.profileImage}
+                      src={selectedPostData?.User.profileImage}
                       size="60px"
                     />
                   </div>
                 </div>
 
-                <div className="w-3/4 flex flex-col gap-2">
-                  <div>
-                    <h1>
-                      by : {selectedPostData?.User?.firstName}{" "}
-                      {selectedPostData?.User?.lastName}
+                <div className="flex flex-col justify-center  gap-2">
+                  <div className="flex gap-2">
+                    <h1>By :</h1>
+                    <h1 className="font-bold">
+                      {selectedPostData?.User.firstName}{" "}
+                      {selectedPostData?.User.lastName}
                     </h1>
                   </div>
-                  <div>
+                  {authenticateUser ? (
+                    isFollowing ? (
+                      <button
+                        type="button"
+                        className="w-[250px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
+                        onClick={() => setShowModalConfirm(!showModalConfirm)}
+                      >
+                        ติดตามแล้ว
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="w-[250px] text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
+                        onClick={handleClickFollow}
+                      >
+                        ติดตาม
+                      </button>
+                    )
+                  ) : (
                     <button
                       type="button"
                       className="w-[250px] text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
                     >
                       ติดตาม
                     </button>
-                    <button
-                      type="button"
-                      className="w-[250px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
-                    >
-                      ติดตามแล้ว
-                    </button>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
+
+            <div className="border-2 border-slate-400 mt-4 p-3 flex flex-col gap-4">
+              <div>
+                <div>
+                  <h1 className="text-lg font-bold">
+                    <span>Tag : </span>
+                    {selectedPostData?.Tag.TagName && (
+                      <span>
+                        {selectedPostData?.Tag.TagName.charAt(0).toUpperCase()}
+                        {selectedPostData?.Tag.TagName.slice(1)}
+                      </span>
+                    )}
+                  </h1>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2">
+                    <BiSolidLike />
+                    <p>22s</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCommentAlt />
+                    <p>22s</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h1 className="font-bold text-sm">Description</h1>
+                <p>{selectedPostData?.description}</p>
+              </div>
+            </div>
+
+            <div className="border-2 border-slate-400 mt-4 p-3">
+              <p className="text-base font-bold">
+                <span>#</span>
+                {selectedPostData?.Tag.TagName && (
+                  <span>
+                    {selectedPostData?.Tag.TagName.charAt(0).toUpperCase()}
+                    {selectedPostData?.Tag.TagName.slice(1)}
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* BOX-2-right */}
-      <div className="w-1/4 bg-gray-200 grid grid-cols-2 md:grid-cols-3 gap-4">
-        {parsePostImageId?.map((el, idx) => (
-          <div>
-            <img
-              key={idx}
-              className="h-auto max-w-full rounded-lg"
-              src={el[0]}
-              alt=""
-            />
-          </div>
-        ))}
+      <div className="w-1/4 flex flex-col gap-6 items-center p-2">
+        <div>
+          <h1 className="text-2xl font-bold">Recommend Picture</h1>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {parsePostImageId?.map((el, idx) => (
+            <div>
+              <img
+                key={idx}
+                className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 cursor-pointer hover:-translate-y-1 hover:scale-110"
+                src={el[0]}
+                alt=""
+              />
+            </div>
+          ))}
+        </div>
+
+        {showModalConfirm && (
+          <ModalConfirmSave
+            isVisible={showModalConfirm}
+            onClose={() => setShowModalConfirm(false)}
+            onSave={handleClickReject}
+            header="เลิกติดตาม"
+            text='คุณต้องการ "เลิกติดตาม" หรือไม่'
+          />
+        )}
       </div>
     </div>
   );

@@ -77,8 +77,8 @@ export default function CreatePostPage() {
           progress: undefined,
           theme: "light"
         });
-      } else if (cloneFile.length >= 2) {
-        toast.warn(`Your images are more than 2!`, {
+      } else if (cloneFile.length >= 1) {
+        toast.warn(`Your images are more than 1!`, {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -184,7 +184,7 @@ export default function CreatePostPage() {
                 สามารถอัพโหลดได้หลายไฟล์
               </div>
               <div className="text-text-gray text-sm">จำกัด 1 ไฟล์</div>
-              <div className="text-text-gray text-sm">(JPEG , PNG , SVG)</div>
+              <div className="text-text-gray text-sm">(JPEG , PNG)</div>
             </div>
           </div>
 
