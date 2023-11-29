@@ -3,17 +3,31 @@ import Avatar from "../components/Avatar";
 import usePost from "../hooks/usePost";
 import useAuth from "../hooks/useAuth";
 import { useState } from "react";
-import { getPostImageById } from "../apis/post-api";
+import {
+  unlike,
+  createLike,
+  getCreatePostById,
+  createComment
+} from "../apis/post-api";
 import { getUserInfoById } from "../apis/user-api";
 import { requestFollow, deleteFollow } from "../apis/follow-api";
 import { useEffect } from "react";
 import { BiSolidLike } from "react-icons/bi";
 import { FaCommentAlt } from "react-icons/fa";
+import { IoMdSend } from "react-icons/io";
 import ModalConfirmSave from "../components/modal/ModalConfirmSave";
 
 export default function PostDetailPage() {
   const { postId } = useParams();
   // console.log("postId:", postId);
+
+  const [title, setTitle] = useState("");
+
+  const { postData } = usePost();
+  // console.log("postData:", postData);
+
+  const { authenticateUser } = useAuth();
+  // console.log("authenticateUser:", authenticateUser);
 
   const navigate = useNavigate();
 
@@ -22,48 +36,53 @@ export default function PostDetailPage() {
   const [postImageId, setPostImageId] = useState([]);
   // console.log("postImageId:", postImageId);
 
-  const parsePostImageId = postImageId?.map(el => JSON.parse(el.image));
-  console.log("parsePostImageId:", parsePostImageId);
-
-  const { postData } = usePost();
-  // console.log("postData:", postData);
-
-  const { authenticateUser } = useAuth();
-  // console.log("authenticateUser:", authenticateUser);
+  const [userFollowById, setuserFollowById] = useState([]);
+  // console.log("userFollowById:", userFollowById);
 
   const selectedPostData = postData?.find(el => el?.id === +postId);
-  // console.log("selectedPostData:", selectedPostData);
+  console.log("selectedPostData:", selectedPostData);
 
   const userId = selectedPostData?.User?.id;
   // console.log("userId:", userId);
 
-  useEffect(() => {
-    const fetchPostImageById = async () => {
-      const res = await getPostImageById(userId);
-      setPostImageId(res?.data?.postImageById);
-    };
-    fetchPostImageById();
-  }, []);
+  const userWithMatchingId = postImageId?.pureCreatePost?.find(
+    user => user.id === userId
+  );
 
-  const [userFollowById, setuserFollowById] = useState([]);
+  // console.log("userWithMatchingId:", userWithMatchingId);
+
   const isFollowing = userFollowById?.userFollows
-    ? userFollowById?.userFollows.some(
+    ? userFollowById?.userFollows?.some(
         follow => follow?.Requester?.id === authenticateUser?.id
       )
     : false;
 
-  useEffect(() => {
-    const fetchUserFollowById = async () => {
-      const res = await getUserInfoById(userId);
+  const fetchUserFollowById = async () => {
+    try {
+      const res = await getUserInfoById(userId || null);
       setuserFollowById(res?.data);
-      // console.log("red.data", res.data);
-    };
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+    }
+  };
+
+  useEffect(() => {
     fetchUserFollowById();
+  }, []);
+
+  useEffect(() => {
+    const fetchgetCreatePostById = async () => {
+      const res = await getCreatePostById(userId || null);
+      setPostImageId(res?.data);
+    };
+
+    fetchgetCreatePostById();
   }, []);
 
   const handleClickFollow = async () => {
     try {
       if (!authenticateUser) {
+        console.log("เข้า");
         navigate("/loginPage");
       }
       await requestFollow(userId);
@@ -75,6 +94,48 @@ export default function PostDetailPage() {
 
   const handleClickReject = async () => {
     await deleteFollow(userId);
+    navigate(0);
+  };
+
+  const isUserLiked = selectedPostData?.Likes?.some(
+    like => like?.User?.id === authenticateUser?.id
+  );
+  // console.log("isUserLiked:", isUserLiked);
+
+  const isUserComment = selectedPostData?.Comments?.some(
+    el => el?.User?.id === authenticateUser?.id
+  );
+  // console.log("isUserComment:", isUserComment);
+
+  const handleClickLikeButton = async () => {
+    if (isUserLiked) {
+      await unlike(postId);
+      navigate(0);
+    } else {
+      await createLike(postId);
+      navigate(0);
+    }
+  };
+
+  const handleSubmitForm = async () => {
+    try {
+      await createComment({
+        title: title,
+        postId: postId,
+        userId: userId
+      });
+
+      setTitle("");
+      navigate(0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleTextareaKeyDown = e => {
+    if (e.key === "Enter") {
+      handleSubmitForm();
+    }
   };
 
   return (
@@ -95,12 +156,36 @@ export default function PostDetailPage() {
               alt=""
             />
           </div>
-          <div className="flex items-center gap-2 ">
-            <BiSolidLike />
-            <p>22s</p>
-          </div>
-        </div>
+          {authenticateUser ? (
+            <div className="flex justify-between">
+              <div className="flex items-center items-center gap-2">
+                {" "}
+                <button
+                  className={`text-2xl ${
+                    isUserLiked ? "text-indigo-600" : "text-black"
+                  } ${isUserLiked ? "hover:text-indigo-700" : "text-black"}`}
+                  onClick={handleClickLikeButton}
+                >
+                  <BiSolidLike />
+                </button>
+                {selectedPostData?.Likes?.length > 0 && (
+                  <p className="text-lg">{selectedPostData?.Likes?.length}</p>
+                )}
+              </div>
 
+              <div className="flex items-center items-center gap-2">
+                <i>
+                  <FaCommentAlt />
+                </i>
+                {selectedPostData?.Comments?.length > 0 && (
+                  <p className="text-lg hover:underline">
+                    {selectedPostData?.Comments?.length} Comments
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : null}
+        </div>
         {/* row-2-BOTTOM */}
         <div className="w-4/5 flex gap-6">
           {/* BOX-LEFT */}
@@ -119,12 +204,15 @@ export default function PostDetailPage() {
                   >
                     Comment
                   </label>
-                  <textarea
-                    id="message"
+                  <input
+                    type="text"
+                    name="title"
                     rows="4"
-                    className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className=" block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="Write your thoughts here..."
-                  ></textarea>
+                    onChange={e => setTitle(e.target.value)}
+                    onKeyDown={handleTextareaKeyDown}
+                  ></input>
                 </div>
               </div>
             ) : (
@@ -193,20 +281,30 @@ export default function PostDetailPage() {
             )}
 
             {/* comment User */}
-            <div className="w-full flex items-center gap-4">
-              <div>
-                <Avatar size="60px" />
-              </div>
+            {selectedPostData?.Comments?.map((el, idx) => (
+              <div key={idx} className="w-full flex items-center gap-4">
+                <div>
+                  <Avatar size="60px" src={el?.User?.profileImage} />
+                </div>
 
-              <div className="flex flex-col">
-                <div>
-                  <h1 className="font-bold">User name</h1>
-                </div>
-                <div>
-                  <h1>comment</h1>
+                <div className="w-full flex flex-col">
+                  <div className="w-full flex justify-start items-center gap-4">
+                    <h1 className="font-bold">{`${el?.User?.firstName} ${el?.User?.lastName}`}</h1>
+                    <h1>
+                      {new Date(el?.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric"
+                      })}
+                    </h1>
+                  </div>
+
+                  <div>
+                    <h1>{el?.title}</h1>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
 
           {/* BOX-RIGHT */}
@@ -217,13 +315,14 @@ export default function PostDetailPage() {
                   <div>
                     <h1>Owner</h1>
                   </div>
-
-                  <div>
-                    <Avatar
-                      src={selectedPostData?.User.profileImage}
-                      size="60px"
-                    />
-                  </div>
+                  <Link to={`/profilePageId/${userId}`}>
+                    <div>
+                      <Avatar
+                        src={selectedPostData?.User.profileImage}
+                        size="60px"
+                      />
+                    </div>
+                  </Link>
                 </div>
 
                 <div className="flex flex-col justify-center  gap-2">
@@ -280,12 +379,11 @@ export default function PostDetailPage() {
 
                 <div className="flex gap-4">
                   <div className="flex items-center gap-2">
-                    <BiSolidLike />
-                    <p>22s</p>
+                    <BiSolidLike /> :<p>{selectedPostData?.Likes?.length}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <FaCommentAlt />
-                    <p>22s</p>
+                    <FaCommentAlt /> :
+                    <p>{selectedPostData?.Comments?.length}</p>
                   </div>
                 </div>
               </div>
@@ -316,15 +414,18 @@ export default function PostDetailPage() {
         <div>
           <h1 className="text-2xl font-bold">Recommend Picture</h1>
         </div>
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {parsePostImageId?.map((el, idx) => (
+          {userWithMatchingId?.Posts?.map((post, index) => (
             <div>
-              <img
-                key={idx}
-                className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 cursor-pointer hover:-translate-y-1 hover:scale-110"
-                src={el[0]}
-                alt=""
-              />
+              <Link to={`/postDetailPage/${post?.id}`}>
+                <img
+                  key={index}
+                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 cursor-pointer hover:-translate-y-1 hover:scale-110"
+                  src={JSON.parse(post?.image)[0]}
+                  alt={`Image ${index + 1}`}
+                />
+              </Link>
             </div>
           ))}
         </div>

@@ -4,17 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import boxIcon from "../public/pics/boxIcon.png";
 import docIcon from "../public/pics/docIcon.png";
 import { toast } from "react-toastify";
-import { getDataTag } from "../apis/tag-api";
 import { CreatePost } from "../apis/post-api";
 import Modal from "../components/modal/Modal";
 import useLoading from "../hooks/useLoading";
 import useAuth from "../hooks/useAuth";
 import ModalSuccess from "../components/modal/ModalSuccess";
+import useTag from "../hooks/useTag";
 
 export default function CreatePostPage() {
   const inputImg = useRef();
 
   const { authenticateUser } = useAuth();
+
+  const { dataTag } = useTag();
+  // console.log("dataTag:", dataTag);
 
   const { startLoading, stopLoading } = useLoading();
 
@@ -41,22 +44,6 @@ export default function CreatePostPage() {
       [name]: value
     }));
   };
-
-  // const handleChangeInput = e => {
-  //   setInput({ ...input, [e.target.name]: e.target.value });
-  // };
-
-  const [dataTag, setDataTag] = useState([]);
-  console.log("dataTag:", dataTag);
-
-  useEffect(() => {
-    const fetchTagData = async () => {
-      const res = await getDataTag();
-      setDataTag(res.data.tags);
-      // console.log("res.data", res.data);
-    };
-    fetchTagData();
-  }, []);
 
   const handleImageChange = e => {
     const fileList = e.target.files;

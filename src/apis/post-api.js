@@ -3,5 +3,12 @@ import axios from "../config/axios";
 export const CreatePost = formData => axios.post("/post/createPost", formData);
 
 export const getDataPost = () => axios.get("/post/getCreatePost");
-export const getPostImageById = userId =>
-  axios.get(`/post/getPostImageById/${userId}`);
+
+export const unlike = postId => axios.delete(`/post/${postId}/likes`);
+export const createLike = postId => axios.post(`/post/${postId}/likes`);
+
+export const getCreatePostById = userId =>
+  axios.get(`/post/getCreatePost/${userId}`);
+
+export const createComment = input =>
+  axios.post(`/post/${input.postId}/comments`, input);

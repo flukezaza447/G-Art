@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { getDataPost } from "../apis/post-api";
+import { getDataPost, getCreatePostById } from "../apis/post-api";
 
 export const PostContext = createContext();
 

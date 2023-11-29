@@ -8,6 +8,7 @@ import TagPage from "../pages/TagPage";
 import ProfilePage from "../pages/ProfilePage";
 import CreatePostPage from "../pages/CreatePostPage";
 import EditProfilePage from "../pages/EditProfilePage";
+import ProfilePageId from "../pages/ProfilePageId";
 
 const router = createBrowserRouter([
   {
@@ -16,7 +17,14 @@ const router = createBrowserRouter([
       { path: "/", element: <HomePage /> },
       { path: "/postDetailPage/:postId", element: <PostDetailPage /> },
       { path: "/tagPage", element: <TagPage /> },
-      { path: "/profilePage", element: <ProfilePage /> },
+      {
+        path: "/profilePage",
+        element: <ProfilePage />
+      },
+      {
+        path: "/profilePageId/:userId",
+        element: <ProfilePageId />
+      },
       { path: "/createPostPage", element: <CreatePostPage /> },
       { path: "/editProfilePage", element: <EditProfilePage /> }
     ]

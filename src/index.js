@@ -6,6 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 import AuthContextProvider from "./contexts/AuthContext";
 import LoadingContextProvider from "./contexts/LoadingContext";
 import PostContextProvider from "./contexts/PostContext";
+import TagContextProvider from "./contexts/TagContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -13,7 +14,9 @@ root.render(
     <LoadingContextProvider>
       <AuthContextProvider>
         <PostContextProvider>
-          <App />
+          <TagContextProvider>
+            <App />
+          </TagContextProvider>
         </PostContextProvider>
       </AuthContextProvider>
     </LoadingContextProvider>
