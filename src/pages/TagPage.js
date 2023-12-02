@@ -1,8 +1,8 @@
 import useAuth from "../hooks/useAuth";
 import useTag from "../hooks/useTag";
 import { FaPlus } from "react-icons/fa";
-import { useRef, useState } from "react";
-import { IoIosClose } from "react-icons/io";
+import { useEffect, useRef, useState } from "react";
+import { AiOutlineDelete } from "react-icons/ai";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { toast } from "react-toastify";
 import Modal from "../components/modal/Modal";
@@ -13,11 +13,13 @@ import useLoading from "../hooks/useLoading";
 import ModalConfirmSave from "../components/modal/ModalConfirmSave";
 import ModalSuccess from "../components/modal/ModalSuccess";
 import validateCreateTag from "../validators/validate-createTag";
+import { useNavigate } from "react-router-dom";
 
 export default function TagPage() {
   const { authenticateUser } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
 
+  const navigate = useNavigate();
   const { dataTag } = useTag();
   // console.log("dataTag:", dataTag);
 
@@ -40,8 +42,11 @@ export default function TagPage() {
   const [arrayImage, setArrayImage] = useState([]);
   // console.log("arrayImage:", arrayImage);
 
+  const [arrayImageURL, setArrayImageURL] = useState([]);
+
   const [input, setInput] = useState({
-    tagName: ""
+    TagName: "",
+    image: ""
   });
   // console.log("input:", input);
 
@@ -88,6 +93,10 @@ export default function TagPage() {
       }
     }
     setArrayImage(cloneFile);
+    setInput(prevInput => ({
+      ...prevInput,
+      image: cloneFile
+    }));
   };
 
   const deleteImg = idx => {
@@ -96,37 +105,49 @@ export default function TagPage() {
     setArrayImage(clone);
   };
 
+  useEffect(() => {
+    if (arrayImage.length < 1) return;
+    const newImageUrls = [];
+    // console.log(arrayImage);
+    arrayImage.forEach(img => {
+      console.log("img:", img);
+      if (img._id) {
+        newImageUrls.push(`http://localhost:4000/images/${img.image}`);
+      } else {
+        newImageUrls.push(URL.createObjectURL(img.image));
+      }
+    });
+    // console.log("newImageUrls:", newImageUrls);
+    setArrayImageURL(newImageUrls);
+  }, [arrayImage]);
+
   const handleSubmitForm = async () => {
     try {
-      startLoading();
-
-      const result = validateCreateTag({
-        TagName: input.tagName,
-        image: arrayImage
-      });
+      const result = validateCreateTag(input);
 
       if (result) {
         setError(result);
       } else {
         setError({});
+
+        startLoading();
+        let formData = new FormData();
+
+        formData.append("TagName", input.TagName);
+
+        for (let i = 0; i < arrayImage.length; i++) {
+          formData.append("image", arrayImage[i].image);
+        }
+        await createTage(formData);
+
+        setInput({
+          TagName: "",
+          image: ""
+        });
+        setArrayImage([]);
+        stopLoading();
+        setShowModalSuccess(true);
       }
-      console.log("result:", result);
-
-      let formData = new FormData();
-
-      formData.append("TagName", input.tagName);
-
-      for (let i = 0; i < arrayImage.length; i++) {
-        formData.append("image", arrayImage[i].image);
-      }
-      await createTage(formData);
-
-      setInput({
-        tagName: ""
-      });
-      setArrayImage([]);
-      stopLoading();
-      setShowModalSuccess(true);
     } catch (err) {
       toast.error(err.response?.data.message);
     }
@@ -134,6 +155,7 @@ export default function TagPage() {
 
   const handleClickReject = async () => {
     await deleteTag(tagId);
+    navigate(0);
   };
 
   return (
@@ -198,10 +220,16 @@ export default function TagPage() {
           onClose={() => setOpen(false)}
           header={"Create Tag"}
         >
-          <div className="w-[900px] bg-red-200 flex justify-center items-center p-2">
+          <div className="w-[900px] flex justify-center items-center p-2">
             <div className="w-full h-full flex flex-col gap-4 items-center justify-center bg-white">
-              <div className="sm:grid sm:grid-cols-6 gap-6">
-                <div className="sm:col-span-4 bg-background-page py-10 px-30 rounded-lg flex flex-col justify-center items-center gap-4 h-80">
+              <div className="w-2/5 sm:grid sm:grid-cols-4">
+                <div
+                  className={` ${
+                    error.image
+                      ? "border border-red-600 "
+                      : " border border-gray-300 "
+                  }sm:col-span-4 bg-background-page py-10 px-30 rounded-lg flex flex-col justify-center items-center gap-4 h-80`}
+                >
                   <img src={boxIcon} className="w-[50px]" />
                   <div className="text-text-green font-semibold">
                     ลากไฟล์มาที่นี่ หรือ
@@ -220,42 +248,67 @@ export default function TagPage() {
                     onChange={handleImageChange}
                   />
                   <div className="flex flex-col justify-center items-center">
+                    {arrayImage.length > 0 ? (
+                      <div className="text-text-gray text-sm">
+                        สามารถอัพโหลดรูปได้ไม่เกิน ({arrayImage.length}/1)
+                      </div>
+                    ) : (
+                      <div className="text-text-gray text-sm">
+                        สามารถอัพโหลดรูปได้ไม่เกิน (0/1)
+                      </div>
+                    )}
                     <div className="text-text-gray text-sm">
-                      สามารถอัพโหลดได้หลายไฟล์
+                      จำกัดไฟล์ (JPEG , PNG)
                     </div>
-                    <div className="text-text-gray text-sm">จำกัด 1 ไฟล์</div>
-                    <div className="text-text-gray text-sm">(JPEG , PNG)</div>
                   </div>
-                  {error.image && (
-                    <div className="text-red-600 text-sm">{error.image}</div>
-                  )}
                 </div>
 
+                {error && (
+                  <div className="w-[120px] text-red-600 text-sm">
+                    {error.image}
+                  </div>
+                )}
+
                 {/* file upload image*/}
-                <div className="col-span-2 sm:mt-3">
-                  <div className="h-64 overflow-y-auto scrollbar">
+                <div className="col-span-2 sm:mt-2">
+                  <div className="overflow-y-auto scrollbar">
                     {arrayImage.map((el, idx) => (
                       <div
                         key={idx}
-                        className="flex justify-between items-center border-b-[1px] mt-2 pb-2"
+                        className="w-full flex items-center border-2 rounded-lg mt-2 p-2"
                       >
-                        <div className="flex items-center text-text-green">
-                          <img src={docIcon} className="w-4 h-4 " />
-                          <div className="ml-2 text-sm">
+                        <div className="flex items-center justify-center">
+                          {arrayImageURL.map((el, idx) => (
+                            <div>
+                              <img
+                                src={el}
+                                crossOrigin="true"
+                                key={idx}
+                                className="w-[40px]"
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center text-text-green gap-4">
+                          <div className="flex items-center ml-2 text-sm gap-2">
+                            <img src={docIcon} className="w-4 h-4 " />
                             {el.image.name || el.image}
                           </div>
+
+                          <button
+                            onClick={() => deleteImg(idx)}
+                            className="hover:text-red-600"
+                          >
+                            <AiOutlineDelete className="text-2xl" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => deleteImg(idx)}
-                          className="text-gray-500  font-semibold w-6 h-6 rounded-full hover:bg-gray-300 hover:text-black flex justify-center items-center text-sm"
-                        >
-                          <IoIosClose className="text-2xl" />
-                        </button>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
+
               <div className="w-full flex justify-center items-center p-2 mb-10">
                 <div className="w-2/5">
                   <div className="mb-6">
@@ -267,14 +320,19 @@ export default function TagPage() {
                     </label>
                     <input
                       type="text"
-                      name="tagName"
-                      value={input.tagName}
-                      className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      name="TagName"
+                      value={input.TagName}
+                      className={`w-full ${
+                        error.TagName
+                          ? "border border-red-600 "
+                          : " border border-gray-300 "
+                      } bg-gray-50 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500`}
                       onChange={handleChangeInput}
                     />
-                    {error?.TagName && (
+
+                    {error && (
                       <div className="text-red-600 text-sm">
-                        {error?.TagName}
+                        {error.TagName}
                       </div>
                     )}
                   </div>

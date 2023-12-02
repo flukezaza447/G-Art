@@ -1,15 +1,14 @@
-import { IoIosClose } from "react-icons/io";
-import { BsFillEyeFill } from "react-icons/bs";
+import { AiOutlineDelete } from "react-icons/ai";
 import { useEffect, useRef, useState } from "react";
 import boxIcon from "../public/pics/boxIcon.png";
 import docIcon from "../public/pics/docIcon.png";
 import { toast } from "react-toastify";
 import { CreatePost } from "../apis/post-api";
-import Modal from "../components/modal/Modal";
 import useLoading from "../hooks/useLoading";
 import useAuth from "../hooks/useAuth";
 import ModalSuccess from "../components/modal/ModalSuccess";
 import useTag from "../hooks/useTag";
+import validateCreatePost from "../validators/validate-createPost";
 
 export default function CreatePostPage() {
   const inputImg = useRef();
@@ -24,18 +23,22 @@ export default function CreatePostPage() {
   const imageTypes = ["image/png", "image/jpeg"];
 
   const [arrayImage, setArrayImage] = useState([]);
+  console.log("arrayImage:", arrayImage);
 
   const [arrayImageURL, setArrayImageURL] = useState([]);
 
-  const [showViewImageModal, setShowViewImageModal] = useState(false);
   const [showModalSuccess, setShowModalSuccess] = useState(false);
 
   const [input, setInput] = useState({
     title: "",
     description: "",
-    tagId: ""
+    tagId: "",
+    image: ""
   });
   console.log("inputData:", input);
+
+  const [error, setError] = useState({});
+  console.log("error:", error);
 
   const handleChangeInput = e => {
     const { name, value } = e.target;
@@ -81,6 +84,11 @@ export default function CreatePostPage() {
       }
     }
     setArrayImage(cloneFile);
+
+    setInput(prevInput => ({
+      ...prevInput,
+      image: cloneFile
+    }));
   };
 
   const deleteImg = idx => {
@@ -107,48 +115,133 @@ export default function CreatePostPage() {
 
   const handleSubmitForm = async () => {
     try {
-      startLoading();
+      const result = validateCreatePost(input);
+      console.log("result:", result);
 
-      let formData = new FormData();
+      if (result) {
+        setError(result);
+      } else {
+        setError({});
+        startLoading();
+        let formData = new FormData();
+        formData.append("title", input.title);
+        formData.append("description", input.description);
+        formData.append("tagId", input.tagId);
+        formData.append("userId", authenticateUser.id);
 
-      formData.append("title", input.title);
-      formData.append("description", input.description);
-      formData.append("tagId", input.tagId);
-      formData.append("userId", authenticateUser.id);
-      // formData.append("image", arrayImage[0].image);
-
-      for (let i = 0; i < arrayImage.length; i++) {
-        console.log("arrayImage:", arrayImage);
-        formData.append("image", arrayImage[i].image);
+        for (let i = 0; i < arrayImage.length; i++) {
+          console.log("arrayImage:", arrayImage);
+          formData.append("image", arrayImage[i].image);
+        }
+        // console.log("arrayImage:", arrayImage[0].image);
+        // console.log("title:", formData.getAll("title"));
+        // console.log("image:", formData.getAll("image"));
+        // console.log("description:", formData.get("description"));
+        // console.log("tagId:", formData.get("tagId"));
+        // console.log("userId:", formData.get("userId"));
+        await CreatePost(formData);
+        setInput({
+          title: "",
+          description: "",
+          tagId: ""
+        });
+        setArrayImage([]);
+        stopLoading();
+        setShowModalSuccess(true);
       }
-
-      console.log("arrayImage:", arrayImage[0].image);
-      console.log("title:", formData.getAll("title"));
-      console.log("image:", formData.getAll("image"));
-      console.log("description:", formData.get("description"));
-      console.log("tagId:", formData.get("tagId"));
-      console.log("userId:", formData.get("userId"));
-
-      await CreatePost(formData);
-
-      setInput({
-        title: "",
-        description: "",
-        tagId: ""
-      });
-      setArrayImage([]);
-      stopLoading();
-      setShowModalSuccess(true);
     } catch (err) {
-      console.log("Create Error", err);
+      // console.log("Create Error", err);
+      toast.error(err.response?.data.message);
     }
   };
 
   return (
     <div className="w-full bg-red-200 flex justify-center items-center p-2">
-      <div className="w-4/5 flex flex-col gap-4 items-center justify-center bg-white">
-        <div className="sm:grid sm:grid-cols-6 gap-6">
-          <div className="sm:col-span-4 bg-background-page py-10 px-30 rounded-lg flex flex-col justify-center items-center gap-4 h-80">
+      <div className="w-4/5 flex flex-col  gap-4 items-center justify-center bg-white">
+        <div className="w-full p-2">
+          <h1 className="text-2xl font-bold">สร้างโพสต์ของคุณ</h1>
+        </div>
+        <div className="w-full flex justify-center items-center p-2 mb-10">
+          <div className="w-2/5">
+            <div className="mb-6">
+              <label
+                htmlFor="base-input"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Name
+              </label>
+              <input
+                type="text"
+                name="title"
+                className={`w-full bg-gray-50 ${
+                  error.title
+                    ? "border border-red-600"
+                    : "border border-gray-300 "
+                } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+                onChange={handleChangeInput}
+                value={input.title}
+              />
+              {error && (
+                <div className="text-red-600 text-sm">{error.title}</div>
+              )}
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="base-input"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Description
+              </label>
+              <input
+                type="text"
+                name="description"
+                className={`w-full bg-gray-50 ${
+                  error.description
+                    ? "border border-red-600"
+                    : "border border-gray-300 "
+                } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+                onChange={handleChangeInput}
+                value={input.description}
+              />
+              {error && (
+                <div className="text-red-600 text-sm">{error.description}</div>
+              )}
+            </div>
+            <label
+              htmlFor="countries"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Tag
+            </label>
+
+            <select
+              id="countries"
+              className={`bg-gray-5 ${
+                error.tagId
+                  ? "border border-red-600"
+                  : "border border-gray-300 "
+              } text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+              name="tagId"
+              onChange={handleChangeInput}
+              value={input.tagId}
+            >
+              <option value="">กรุณาเลือก</option>
+              {dataTag.map((el, idx) => (
+                <option key={idx} value={el.id}>
+                  {el.TagName}
+                </option>
+              ))}
+            </select>
+            {error && <div className="text-red-600 text-sm">{error.tagId}</div>}
+          </div>
+        </div>
+
+        <div className="w-2/5 sm:grid sm:grid-cols-4">
+          <div
+            className={` ${
+              error.image ? "border border-red-600" : "border-2"
+            } sm:col-span-4 bg-background-page py-10 px-30 rounded-lg flex flex-col justify-center items-center gap-4 h-80 `}
+          >
             <img src={boxIcon} className="w-[50px]" />
             <div className="text-text-green font-semibold">
               ลากไฟล์มาที่นี่ หรือ
@@ -167,124 +260,60 @@ export default function CreatePostPage() {
               onChange={handleImageChange}
             />
             <div className="flex flex-col justify-center items-center">
+              {arrayImage.length > 0 ? (
+                <div className="text-text-gray text-sm">
+                  สามารถอัพโหลดรูปได้ไม่เกิน ({arrayImage.length}/1)
+                </div>
+              ) : (
+                <div className="text-text-gray text-sm">
+                  สามารถอัพโหลดรูปได้ไม่เกิน (0/1)
+                </div>
+              )}
               <div className="text-text-gray text-sm">
-                สามารถอัพโหลดได้หลายไฟล์
+                จำกัดไฟล์ (JPEG , PNG)
               </div>
-              <div className="text-text-gray text-sm">จำกัด 1 ไฟล์</div>
-              <div className="text-text-gray text-sm">(JPEG , PNG)</div>
             </div>
           </div>
 
+          {error && <div className="text-red-600 text-sm">{error.image}</div>}
+
           {/* file upload image*/}
-          <div className="col-span-2 sm:mt-3">
-            <div className="h-64 overflow-y-auto scrollbar">
+          <div className="col-span-2 sm:mt-2">
+            <div className="overflow-y-auto scrollbar">
               {arrayImage.map((el, idx) => (
                 <div
                   key={idx}
-                  className="flex justify-between items-center border-b-[1px] mt-2 pb-2"
+                  className="w-4/5 flex items-center border-2 rounded-lg mt-2 p-2"
                 >
-                  <div className="flex items-center text-text-green">
-                    <img src={docIcon} className="w-4 h-4 " />
-                    <div className="ml-2 text-sm">
+                  <div className="flex items-center justify-center">
+                    {arrayImageURL.map((el, idx) => (
+                      <div>
+                        <img
+                          src={el}
+                          crossOrigin="true"
+                          key={idx}
+                          className="w-[40px]"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center text-text-green gap-4">
+                    <div className="flex items-center ml-2 text-sm gap-2">
+                      <img src={docIcon} className="w-4 h-4 " />
                       {el.image.name || el.image}
                     </div>
+
+                    <button
+                      onClick={() => deleteImg(idx)}
+                      className="hover:text-red-600"
+                    >
+                      <AiOutlineDelete className="text-2xl" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => deleteImg(idx)}
-                    className="text-gray-500  font-semibold w-6 h-6 rounded-full hover:bg-gray-300 hover:text-black flex justify-center items-center text-sm"
-                  >
-                    <IoIosClose className="text-2xl" />
-                  </button>
                 </div>
               ))}
             </div>
-            {!!arrayImage.length && (
-              <button
-                onClick={() => setShowViewImageModal(true)}
-                className="mt-2 flex mx-auto items-center py-1 px-4 border-2 border-text-green  shadow-sm font-medium rounded-md text-text-green  hover:bg-sidebar-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-800 "
-              >
-                <BsFillEyeFill className="w-[16px] h-[16px] text-text-green mr-2" />
-                ดูรูปภาพ
-              </button>
-            )}
-          </div>
-
-          {/* view image */}
-          <Modal
-            id="showViewImageModal"
-            isVisible={showViewImageModal}
-            width={"[800px]"}
-            onClose={() => setShowViewImageModal(false)}
-            header={"รูปภาพ"}
-            showViewImageModal={showViewImageModal}
-          >
-            <div className=" px-10 pt-2 pb-10">
-              {arrayImageURL.map((el, idx) => (
-                <img
-                  src={el}
-                  crossorigin="true"
-                  key={idx}
-                  className="w-[640px] mb-5"
-                />
-              ))}
-            </div>
-          </Modal>
-          {/* <ToastContainer /> */}
-        </div>
-
-        <div className="w-full flex justify-center items-center p-2 mb-10">
-          <div className="w-2/5">
-            <div className="mb-6">
-              <label
-                htmlFor="base-input"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Name
-              </label>
-              <input
-                type="text"
-                name="title"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                onChange={handleChangeInput}
-                value={input.title}
-              />
-            </div>
-            <div className="mb-6">
-              <label
-                htmlFor="base-input"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Description
-              </label>
-              <input
-                type="text"
-                name="description"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                onChange={handleChangeInput}
-                value={input.description}
-              />
-            </div>
-            <label
-              htmlFor="countries"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Tag
-            </label>
-
-            <select
-              id="countries"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              name="tagId"
-              onChange={handleChangeInput}
-              value={input.tagId}
-            >
-              <option value="">กรุณาเลือก</option>
-              {dataTag.map((el, idx) => (
-                <option key={idx} value={el.id}>
-                  {el.TagName}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 

@@ -1,7 +1,13 @@
 import Joi from "joi";
 
-const createTagSchema = Joi.object({
-  TagName: Joi.string().trim().messages({
+const createPostSchema = Joi.object({
+  title: Joi.string().trim().required().messages({
+    "string.empty": "post name is required"
+  }),
+  description: Joi.string().trim().required().messages({
+    "string.empty": "description is required"
+  }),
+  tagId: Joi.string().required().messages({
     "string.empty": "tag name is required"
   }),
   image: Joi.array()
@@ -18,8 +24,8 @@ const createTagSchema = Joi.object({
     })
 });
 
-const validateCreateTag = input => {
-  const { error } = createTagSchema.validate(input, {
+const validateCreatePost = input => {
+  const { error } = createPostSchema.validate(input, {
     abortEarly: false
   });
 
@@ -32,4 +38,4 @@ const validateCreateTag = input => {
   }
 };
 
-export default validateCreateTag;
+export default validateCreatePost;

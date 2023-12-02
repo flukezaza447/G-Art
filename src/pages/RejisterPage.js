@@ -19,6 +19,7 @@ export default function LoginPage() {
   console.log("input:", input);
 
   const [error, setError] = useState({});
+  console.log("error:", error);
 
   const { startLoading, stopLoading } = useLoading();
 

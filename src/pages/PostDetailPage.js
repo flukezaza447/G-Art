@@ -7,7 +7,8 @@ import {
   unlike,
   createLike,
   getCreatePostById,
-  createComment
+  createComment,
+  getDataPost
 } from "../apis/post-api";
 import { getUserInfoById } from "../apis/user-api";
 import { requestFollow, deleteFollow } from "../apis/follow-api";
@@ -15,6 +16,7 @@ import { useEffect } from "react";
 import { BiSolidLike } from "react-icons/bi";
 import { FaCommentAlt } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
+import { CiEdit } from "react-icons/ci";
 import ModalConfirmSave from "../components/modal/ModalConfirmSave";
 
 export default function PostDetailPage() {
@@ -23,13 +25,15 @@ export default function PostDetailPage() {
 
   const [title, setTitle] = useState("");
 
-  const { postData } = usePost();
+  const { postData, setPostData } = usePost();
   // console.log("postData:", postData);
 
   const { authenticateUser } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
 
   const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
 
   const [showModalConfirm, setShowModalConfirm] = useState(false);
 
@@ -59,7 +63,7 @@ export default function PostDetailPage() {
 
   const fetchUserFollowById = async () => {
     try {
-      const res = await getUserInfoById(userId || null);
+      const res = await getUserInfoById(userId);
       setuserFollowById(res?.data);
     } catch (err) {
       console.error("Error fetching user info:", err);
@@ -82,7 +86,6 @@ export default function PostDetailPage() {
   const handleClickFollow = async () => {
     try {
       if (!authenticateUser) {
-        console.log("เข้า");
         navigate("/loginPage");
       }
       await requestFollow(userId);
@@ -110,10 +113,27 @@ export default function PostDetailPage() {
   const handleClickLikeButton = async () => {
     if (isUserLiked) {
       await unlike(postId);
-      navigate(0);
+      setPostData(previousPosts => {
+        const deepClone = structuredClone(previousPosts);
+        // console.log("deepCloneUnlike:", deepClone);
+        const idx = deepClone.findIndex(el => el.id === +postId);
+        // console.log("idxUnlike:", idx);
+        deepClone[idx].Likes = deepClone[idx].Likes.filter(
+          el => el.userId !== authenticateUser.id
+        );
+        return deepClone;
+      });
     } else {
-      await createLike(postId);
-      navigate(0);
+      const res = await createLike(postId);
+      console.log("res:", res.data.like);
+      setPostData(previousPosts => {
+        const deepClone = structuredClone(previousPosts);
+        // console.log("deepCloneCreateLike:", deepClone);
+        const idx = deepClone.findIndex(el => el.id === +postId);
+        // console.log("idxCreateLike:", idx);
+        deepClone[idx].Likes.push(res.data.like);
+        return deepClone;
+      });
     }
   };
 
@@ -281,30 +301,45 @@ export default function PostDetailPage() {
             )}
 
             {/* comment User */}
-            {selectedPostData?.Comments?.map((el, idx) => (
-              <div key={idx} className="w-full flex items-center gap-4">
-                <div>
-                  <Avatar size="60px" src={el?.User?.profileImage} />
-                </div>
+            {selectedPostData?.Comments?.map((el, idx) => {
+              const isCurrentUserComment = el?.User?.id === userId;
 
-                <div className="w-full flex flex-col">
-                  <div className="w-full flex justify-start items-center gap-4">
-                    <h1 className="font-bold">{`${el?.User?.firstName} ${el?.User?.lastName}`}</h1>
-                    <h1>
-                      {new Date(el?.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric"
-                      })}
-                    </h1>
-                  </div>
-
+              return (
+                <div
+                  key={idx}
+                  className={`w-full flex items-center gap-4 ${
+                    isCurrentUserComment ? "border-2 rounded-lg p-2" : ""
+                  }  `}
+                >
                   <div>
-                    <h1>{el?.title}</h1>
+                    <Avatar size="60px" src={el?.User?.profileImage} />
                   </div>
+
+                  <div className="w-full flex flex-col">
+                    <div className="w-full flex justify-start items-center gap-4">
+                      <h1 className="font-bold">{`${el?.User?.firstName} ${el?.User?.lastName}`}</h1>
+                      <h1>
+                        {new Date(el?.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric"
+                        })}
+                      </h1>
+                    </div>
+
+                    <div>
+                      <h1>{el?.title}</h1>
+                    </div>
+                  </div>
+
+                  {isCurrentUserComment && (
+                    <button className="p-2 text-lg hover:text-red-600">
+                      <CiEdit />
+                    </button>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* BOX-RIGHT */}
@@ -367,11 +402,10 @@ export default function PostDetailPage() {
               <div>
                 <div>
                   <h1 className="text-lg font-bold">
-                    <span>Tag : </span>
-                    {selectedPostData?.Tag.TagName && (
+                    {selectedPostData?.title && (
                       <span>
-                        {selectedPostData?.Tag.TagName.charAt(0).toUpperCase()}
-                        {selectedPostData?.Tag.TagName.slice(1)}
+                        {selectedPostData?.title.charAt(0).toUpperCase()}
+                        {selectedPostData?.title.slice(1)}
                       </span>
                     )}
                   </h1>
@@ -398,7 +432,7 @@ export default function PostDetailPage() {
               <p className="text-base font-bold">
                 <span>#</span>
                 {selectedPostData?.Tag.TagName && (
-                  <span>
+                  <span className="cursor-pointer hover:underline">
                     {selectedPostData?.Tag.TagName.charAt(0).toUpperCase()}
                     {selectedPostData?.Tag.TagName.slice(1)}
                   </span>
