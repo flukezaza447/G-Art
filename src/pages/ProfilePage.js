@@ -1,9 +1,21 @@
 import { Link } from "react-router-dom";
 import Avatar from "../components/Avatar";
 import useAuth from "../hooks/useAuth";
+import usePost from "../hooks/usePost";
+import CardPost from "../components/CardPost";
 
 export default function ProfilePage() {
   const { authenticateUser } = useAuth();
+  // console.log("authenticateUser:", authenticateUser);
+
+  const { postData } = usePost();
+  // console.log("postData:", postData);
+
+  const userPosts = postData.filter(
+    post => post.User.id === authenticateUser.id
+  );
+
+  console.log("userPosts;", userPosts);
   return (
     <>
       <div>
@@ -49,78 +61,11 @@ export default function ProfilePage() {
               <h1>Your Post</h1>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
-
-              <div className="p-2">
-                <img
-                  className="h-auto max-w-full rounded-lg transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+              {userPosts.map((el, idx) => {
+                const postImage = JSON.parse(el.image);
+                return <CardPost key={idx} el={el} postImage={postImage} />;
+              })}
             </div>
           </div>
         </div>

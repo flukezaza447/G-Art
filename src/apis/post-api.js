@@ -12,3 +12,9 @@ export const getCreatePostById = userId =>
 
 export const createComment = input =>
   axios.post(`/post/${input.postId}/comments`, input);
+
+export const editComment = input =>
+  axios.post(`/post/${input.postId}/editComments`, input);
+
+export const deleteCommentId = input =>
+  axios.delete(`/post/${input.id}`, { params: { userId: input.userId } });

@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import usePost from "../hooks/usePost";
+import CardPost from "../components/CardPost";
+
 export default function HomePage() {
   const { postData } = usePost();
-  // console.log("postData:", postData);
+  console.log("postData:", postData);
 
   return (
     <div className="relative">
@@ -14,26 +16,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 z-0">
         {postData.map((el, idx) => {
           const postImage = JSON.parse(el.image);
-          return (
-            <div
-              key={idx}
-              className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-            >
-              <div>
-                <Link to={`/postDetailPage/${el.id}`}>
-                  <img className="rounded-t-lg" src={postImage} alt="" />
-                </Link>
-              </div>
-              <div className="p-5">
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {el.title}
-                </h5>
-                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                  {el.description}
-                </p>
-              </div>
-            </div>
-          );
+          return <CardPost key={idx} el={el} postImage={postImage} />;
         })}
       </div>
     </div>

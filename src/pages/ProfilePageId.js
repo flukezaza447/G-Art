@@ -3,12 +3,13 @@ import Avatar from "../components/Avatar";
 import { useEffect, useState } from "react";
 import { getCreatePostById } from "../apis/post-api";
 import usePost from "../hooks/usePost";
+import CardPost from "../components/CardPost";
 
 export default function ProfilePageId() {
   const { userId } = useParams();
 
   const [postDataId, setPostDataId] = useState([]);
-  console.log("postDataId:", postDataId);
+  // console.log("postDataId:", postDataId);
 
   const selectedPostData = postDataId?.find(el => el?.id === +userId);
   console.log("selectedPostData:", selectedPostData);
@@ -54,15 +55,10 @@ export default function ProfilePageId() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-20">
-              {selectedPostData?.Posts?.map((post, index) => (
+              {selectedPostData?.Posts?.map((el, idx) => (
                 <div>
-                  <Link to={`/postDetailPage/${post?.id}`}>
-                    <img
-                      key={index}
-                      className="h-[250px] rounded-lg transition ease-in-out delay-150 cursor-pointer hover:-translate-y-1 hover:scale-110"
-                      src={JSON.parse(post?.image)[0]}
-                      alt={`Image ${index + 1}`}
-                    />
+                  <Link to={`/postDetailPage/${el?.id}`}>
+                    <CardPost key={idx} el={el} />
                   </Link>
                 </div>
               ))}

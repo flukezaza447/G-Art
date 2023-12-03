@@ -8,22 +8,29 @@ import {
   createLike,
   getCreatePostById,
   createComment,
-  getDataPost
+  getDataPost,
+  editComment,
+  deleteCommentId
 } from "../apis/post-api";
 import { getUserInfoById } from "../apis/user-api";
 import { requestFollow, deleteFollow } from "../apis/follow-api";
 import { useEffect } from "react";
 import { BiSolidLike } from "react-icons/bi";
+import { RiDeleteBin5Fill } from "react-icons/ri";
 import { FaCommentAlt } from "react-icons/fa";
-import { IoMdSend } from "react-icons/io";
 import { CiEdit } from "react-icons/ci";
 import ModalConfirmSave from "../components/modal/ModalConfirmSave";
+import PostAction from "../feature/postDetailPage.js/PostAction";
 
 export default function PostDetailPage() {
   const { postId } = useParams();
   // console.log("postId:", postId);
 
   const [title, setTitle] = useState("");
+  // console.log("title:", title);
+
+  const [editedComment, setEditedComment] = useState("");
+  // console.log("editedComment:", editedComment);
 
   const { postData, setPostData } = usePost();
   // console.log("postData:", postData);
@@ -33,9 +40,14 @@ export default function PostDetailPage() {
 
   const navigate = useNavigate();
 
-  const [open, setOpen] = useState(false);
+  const [selectedComment, setSelectedComment] = useState(null);
+  // console.log("selectedComment:", selectedComment);
+
+  const [selectedDeleteComment, setSelectedDeleteComment] = useState(null);
+  // console.log("selectedDeleteComment:", selectedDeleteComment);
 
   const [showModalConfirm, setShowModalConfirm] = useState(false);
+  const [showModalDeleteComment, setShowModalDeleteComment] = useState(false);
 
   const [postImageId, setPostImageId] = useState([]);
   // console.log("postImageId:", postImageId);
@@ -44,7 +56,7 @@ export default function PostDetailPage() {
   // console.log("userFollowById:", userFollowById);
 
   const selectedPostData = postData?.find(el => el?.id === +postId);
-  console.log("selectedPostData:", selectedPostData);
+  // console.log("selectedPostData:", selectedPostData);
 
   const userId = selectedPostData?.User?.id;
   // console.log("userId:", userId);
@@ -81,7 +93,7 @@ export default function PostDetailPage() {
     };
 
     fetchgetCreatePostById();
-  }, []);
+  }, [userId, postData]);
 
   const handleClickFollow = async () => {
     try {
@@ -104,11 +116,6 @@ export default function PostDetailPage() {
     like => like?.User?.id === authenticateUser?.id
   );
   // console.log("isUserLiked:", isUserLiked);
-
-  const isUserComment = selectedPostData?.Comments?.some(
-    el => el?.User?.id === authenticateUser?.id
-  );
-  // console.log("isUserComment:", isUserComment);
 
   const handleClickLikeButton = async () => {
     if (isUserLiked) {
@@ -137,16 +144,25 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleSubmitForm = async () => {
+  const handleCreatePost = async () => {
     try {
-      await createComment({
+      const res = await createComment({
         title: title,
         postId: postId,
         userId: userId
       });
-
+      console.log("res:", res);
       setTitle("");
       navigate(0);
+
+      // setPostData(previousPosts => {
+      //   const deepClone = structuredClone(previousPosts);
+      //   // console.log("deepCloneCreateLike:", deepClone);
+      //   const idx = deepClone.findIndex(el => el.id === +postId);
+      //   // console.log("idxCreateLike:", idx);
+      //   deepClone[idx].Comments.push(res.data.comment);
+      //   return deepClone;
+      // });
     } catch (err) {
       console.error(err);
     }
@@ -154,8 +170,32 @@ export default function PostDetailPage() {
 
   const handleTextareaKeyDown = e => {
     if (e.key === "Enter") {
-      handleSubmitForm();
+      handleCreatePost();
     }
+  };
+
+  const handleEditComment = async () => {
+    try {
+      await editComment({
+        title: editedComment,
+        postId: postId,
+        userId: userId,
+        id: selectedComment
+      });
+
+      setEditedComment("");
+      navigate(0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleClickDeleteComment = async () => {
+    await deleteCommentId({
+      id: selectedDeleteComment,
+      userId: userId
+    });
+    navigate(0);
   };
 
   return (
@@ -177,33 +217,11 @@ export default function PostDetailPage() {
             />
           </div>
           {authenticateUser ? (
-            <div className="flex justify-between">
-              <div className="flex items-center items-center gap-2">
-                {" "}
-                <button
-                  className={`text-2xl ${
-                    isUserLiked ? "text-indigo-600" : "text-black"
-                  } ${isUserLiked ? "hover:text-indigo-700" : "text-black"}`}
-                  onClick={handleClickLikeButton}
-                >
-                  <BiSolidLike />
-                </button>
-                {selectedPostData?.Likes?.length > 0 && (
-                  <p className="text-lg">{selectedPostData?.Likes?.length}</p>
-                )}
-              </div>
-
-              <div className="flex items-center items-center gap-2">
-                <i>
-                  <FaCommentAlt />
-                </i>
-                {selectedPostData?.Comments?.length > 0 && (
-                  <p className="text-lg hover:underline">
-                    {selectedPostData?.Comments?.length} Comments
-                  </p>
-                )}
-              </div>
-            </div>
+            <PostAction
+              isUserLiked={isUserLiked}
+              handleClickLikeButton={handleClickLikeButton}
+              selectedPostData={selectedPostData}
+            />
           ) : null}
         </div>
         {/* row-2-BOTTOM */}
@@ -309,7 +327,7 @@ export default function PostDetailPage() {
                   key={idx}
                   className={`w-full flex items-center gap-4 ${
                     isCurrentUserComment ? "border-2 rounded-lg p-2" : ""
-                  }  `}
+                  }`}
                 >
                   <div>
                     <Avatar size="60px" src={el?.User?.profileImage} />
@@ -327,15 +345,68 @@ export default function PostDetailPage() {
                       </h1>
                     </div>
 
-                    <div>
-                      <h1>{el?.title}</h1>
+                    <div className="w-full">
+                      {selectedComment === el?.id ? (
+                        // แสดงแบบแก้ไข comment
+                        <div className="w-full flex flex-col items-center justify-center gap-2">
+                          <textarea
+                            className="w-full"
+                            value={editedComment || el?.title}
+                            onChange={e => setEditedComment(e.target.value)}
+                          />
+
+                          <div>
+                            <button
+                              type="button"
+                              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                              onClick={handleEditComment}
+                            >
+                              ยืนยัน
+                            </button>
+
+                            <button
+                              type="button"
+                              className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                              onClick={() => setSelectedComment(false)}
+                            >
+                              ยกเลิก
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        // แสดง comment ปกติ
+                        <div className="whitespace-pre-line break-all">
+                          <h1>{el?.title}</h1>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {isCurrentUserComment && (
-                    <button className="p-2 text-lg hover:text-red-600">
-                      <CiEdit />
-                    </button>
+                    <div className="flex">
+                      <button
+                        className="p-2 text-lg hover:text-red-600"
+                        onClick={() => {
+                          if (selectedComment === el?.id) {
+                            setSelectedComment(null);
+                          } else {
+                            setSelectedComment(el?.id);
+                          }
+                        }}
+                      >
+                        <CiEdit />
+                      </button>
+
+                      <button
+                        className="p-2 text-lg hover:text-red-600"
+                        onClick={() => {
+                          setSelectedDeleteComment(el?.id);
+                          setShowModalDeleteComment(!showModalDeleteComment);
+                        }}
+                      >
+                        <RiDeleteBin5Fill />
+                      </button>
+                    </div>
                   )}
                 </div>
               );
@@ -471,6 +542,16 @@ export default function PostDetailPage() {
             onSave={handleClickReject}
             header="เลิกติดตาม"
             text='คุณต้องการ "เลิกติดตาม" หรือไม่'
+          />
+        )}
+
+        {showModalDeleteComment && (
+          <ModalConfirmSave
+            isVisible={showModalDeleteComment}
+            onClose={() => setShowModalDeleteComment(false)}
+            onSave={handleClickDeleteComment}
+            header="ลบคอมเมนต์"
+            text='คุณต้องการ "ลบคอมเมนต์" หรือไม่'
           />
         )}
       </div>
