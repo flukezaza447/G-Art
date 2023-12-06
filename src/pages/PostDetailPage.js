@@ -55,7 +55,7 @@ export default function PostDetailPage() {
   // console.log("selectedComment:", selectedComment);
 
   const [selectedDeleteComment, setSelectedDeleteComment] = useState(null);
-  // console.log("selectedDeleteComment:", selectedDeleteComment);
+  console.log("selectedDeleteComment:", selectedDeleteComment);
 
   const [showModalSuccess, setShowModalSuccess] = useState(false);
   const [showModalConfirm, setShowModalConfirm] = useState(false);
@@ -192,14 +192,6 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleClickDeleteComment = async () => {
-    await deleteCommentId({
-      id: selectedDeleteComment,
-      userId: userId
-    });
-    navigate(0);
-  };
-
   const handleClickDeletePost = async () => {
     try {
       startLoading();
@@ -214,6 +206,14 @@ export default function PostDetailPage() {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const handleClickDeleteComment = async () => {
+    await deleteCommentId({
+      id: selectedDeleteComment,
+      userId: userId
+    });
+    navigate(0);
   };
 
   return (
@@ -282,7 +282,7 @@ export default function PostDetailPage() {
             {/* BOX-TOP */}
             <div className="w-4/5">
               {authenticateUser && authenticateUser?.id === userId ? null : (
-                <div className="border-2 border-slate-400 flex justify-center items-center p-3">
+                <div className="flex justify-start items-center p-3">
                   <div className="w-1/4 flex flex-col justify-start items-start ml-2">
                     <div>
                       <h1>Owner</h1>
@@ -339,7 +339,7 @@ export default function PostDetailPage() {
                 </div>
               )}
 
-              <div className="border-2 border-slate-400 mt-4 p-3 flex flex-col gap-4">
+              <div className="mt-4 p-3 flex flex-col gap-4">
                 <div>
                   <div>
                     <h1 className="text-lg font-bold">
@@ -364,7 +364,7 @@ export default function PostDetailPage() {
                 </div>
               </div>
 
-              <div className="border-2 border-slate-400 mt-4 p-3">
+              <div className="mt-4 p-3">
                 {dataTag.map((el, idx) => (
                   <p className="text-base font-bold" key={idx}>
                     {selectedPostData?.Tag.TagName === el.TagName && (

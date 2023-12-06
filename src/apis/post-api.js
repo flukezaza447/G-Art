@@ -17,7 +17,9 @@ export const editComment = input =>
   axios.post(`/post/${input.postId}/editComments`, input);
 
 export const deleteCommentId = input =>
-  axios.delete(`/post/${input.id}`, { params: { userId: input.userId } });
+  axios.delete(`/post/${input.id}/comments`, {
+    params: { userId: input.userId }
+  });
 
 export const deletePost = input => {
   // console.log("inputapi:", input);

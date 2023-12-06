@@ -58,7 +58,17 @@ export default function CreatePostPage() {
 
       const formData = new FormData();
 
-      formData.append("profileImage", file);
+      // formData.append("profileImage", file);
+
+      if (file) {
+        formData.append("profileImage", file);
+      } else {
+        formData.append("profileImage", authenticateUser?.profileImage);
+        console.log(
+          "profileImageCurrent:",
+          formData.append("profileImage", authenticateUser?.profileImage)
+        );
+      }
 
       await userUpdateProfile(formData);
 
@@ -82,7 +92,6 @@ export default function CreatePostPage() {
 
   const handleClickUpdatePassword = async () => {
     try {
-      startLoading();
       const result = validateUpdatePassword(input);
       console.log(result, "result------------------------");
       if (result) {
@@ -91,7 +100,7 @@ export default function CreatePostPage() {
         console.log("no error");
         setError({});
       }
-
+      // startLoading();
       await userApi.updateUserInfoPassword({
         ...input,
         oldPassword: input.oldPassword,
@@ -100,13 +109,13 @@ export default function CreatePostPage() {
       });
 
       toast.success("successfully updated!");
-      stopLoading();
+      // stopLoading();
       logout();
       navigate("/");
     } catch (err) {
       if (err.response && err.response.status === 401) {
         setError({ oldPassword: "Invalid old password" });
-        setError({});
+        // setError({});
       } else {
         console.log(err.response?.data.message);
         toast.error("Failed to update");

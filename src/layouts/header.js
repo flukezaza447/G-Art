@@ -49,7 +49,7 @@ export default function Header() {
                 </svg>
               </div>
 
-              <div className="block w-full h-10 flex items-center justify-between  text-sm text-gray-900 rounded-full bg-gray-50 focus:outline-none focus:ring-0">
+              <div className="block border-2 w-full h-10 flex items-center justify-between  text-sm text-gray-900 rounded-full bg-gray-50 focus:outline-none focus:ring-0">
                 <input
                   type="search"
                   id="default-search"

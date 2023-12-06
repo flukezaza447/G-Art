@@ -247,7 +247,7 @@ export default function CreatePostPage() {
               ลากไฟล์มาที่นี่ หรือ
             </div>
             <button
-              className=" inline-flex  justify-center items-center py-1 px-4 border-2 border-text-green  shadow-sm font-medium rounded-full text-text-green  hover:bg-sidebar-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-800 "
+              className="inline-flex justify-center items-center py-1 px-4 border-2 border-text-green shadow-sm font-medium rounded-full text-text-green hover:bg-sidebar-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-800"
               onClick={() => inputImg.current.click()}
             >
               Upload
@@ -259,20 +259,20 @@ export default function CreatePostPage() {
               ref={inputImg}
               onChange={handleImageChange}
             />
-            <div className="flex flex-col justify-center items-center">
-              {arrayImage.length > 0 ? (
+            {arrayImage.length > 0 ? (
+              <div className="flex flex-col justify-center items-center">
                 <div className="text-text-gray text-sm">
                   สามารถอัพโหลดรูปได้ไม่เกิน ({arrayImage.length}/1)
                 </div>
-              ) : (
                 <div className="text-text-gray text-sm">
-                  สามารถอัพโหลดรูปได้ไม่เกิน (0/1)
+                  จำกัดไฟล์ (JPEG, PNG)
                 </div>
-              )}
-              <div className="text-text-gray text-sm">
-                จำกัดไฟล์ (JPEG , PNG)
               </div>
-            </div>
+            ) : (
+              <div className="text-text-gray text-sm">
+                สามารถอัพโหลดรูปได้ไม่เกิน (0/1)
+              </div>
+            )}
           </div>
 
           {error && <div className="text-red-600 text-sm">{error.image}</div>}
