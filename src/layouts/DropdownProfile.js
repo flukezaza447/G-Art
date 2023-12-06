@@ -5,7 +5,8 @@ import { FaBell } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
 import useAuth from "../hooks/useAuth";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { getUserInfoById } from "../apis/user-api";
 
 export default function DropdownProfile() {
   const { logout, authenticateUser } = useAuth();
@@ -20,6 +21,7 @@ export default function DropdownProfile() {
       setOpen(false);
     }
   });
+
   return (
     <div className="flex w-4/12 justify-end items-center gap-4">
       {/* BOX-left */}
@@ -32,7 +34,10 @@ export default function DropdownProfile() {
             Create Post
           </button>
         </Link>
-        <FaBell />
+
+        <button>
+          <FaBell />
+        </button>
       </div>
 
       {/* BOX-right */}

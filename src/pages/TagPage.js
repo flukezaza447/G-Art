@@ -13,15 +13,16 @@ import useLoading from "../hooks/useLoading";
 import ModalConfirmSave from "../components/modal/ModalConfirmSave";
 import ModalSuccess from "../components/modal/ModalSuccess";
 import validateCreateTag from "../validators/validate-createTag";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function TagPage() {
+  const navigate = useNavigate();
+
   const { authenticateUser } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
 
-  const navigate = useNavigate();
   const { dataTag } = useTag();
-  // console.log("dataTag:", dataTag);
+  console.log("dataTag:", dataTag);
 
   const { startLoading, stopLoading } = useLoading();
 
@@ -36,6 +37,7 @@ export default function TagPage() {
   // console.log("tagIdToDelete:", tagIdToDelete);
 
   const tagId = tagIdToDelete;
+  console.log("tagId:", tagId);
 
   const imageTypes = ["image/png", "image/jpeg"];
 
@@ -155,7 +157,7 @@ export default function TagPage() {
 
   const handleClickReject = async () => {
     await deleteTag(tagId);
-    navigate(0);
+    setShowModalSuccess(true);
   };
 
   return (
@@ -164,9 +166,9 @@ export default function TagPage() {
         <h1 className="text-3xl font-bold">Tag</h1>
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-10">
+      <div className="mt-10 flex gap-10">
         {authenticateUser?.isAdmin === true ? (
-          <div className="flex flex-wrap ">
+          <div className="flex">
             <div className="">
               <div className="bg-gray-400 rounded-t-lg w-[200px] h-[200px] cursor-pointer ml-10 flex items-center justify-center">
                 <button onClick={() => setOpen(true)}>
@@ -183,31 +185,36 @@ export default function TagPage() {
         ) : null}
 
         {dataTag.map((el, idx) => (
-          <div className="relative flex flex-col items-center" key={el.id}>
+          <div
+            className="relative flex flex-col flex-wrap gap-2 items-center"
+            key={idx}
+          >
             <div className="relative">
               {authenticateUser?.isAdmin === true ? (
                 <button
                   onClick={() => {
-                    setShowModalConfirm(true);
                     setTagIdToDelete(el.id);
+                    setShowModalConfirm(!showModalConfirm);
                   }}
                   className="absolute top-0 right-0 text-3xl cursor-pointer hover:text-red-600 "
                 >
                   <RiDeleteBin5Fill />
                 </button>
               ) : null}
-              <img
-                className="rounded-t-lg w-[200px] h-[200px] cursor-pointer"
-                src={
-                  el.image ||
-                  "https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                }
-                alt=""
-              />
+              <Link key={idx} to="/" state={{ id: el.TagName }}>
+                <img
+                  className="rounded-t-lg w-[200px] h-[200px] cursor-pointer"
+                  src={el.image}
+                  alt=""
+                />
+              </Link>
             </div>
-            <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-              {el?.TagName}
-            </h1>
+
+            <div>
+              <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                {el?.TagName}
+              </h1>
+            </div>
           </div>
         ))}
       </div>

@@ -6,9 +6,11 @@ import useLoading from "../hooks/useLoading";
 import validateEditProfile from "../validators/validate-editProfile";
 import * as userApi from "../apis/user-api";
 import { useNavigate } from "react-router-dom";
+import validateUpdatePassword from "../validators/validate-updatePassword";
 
 export default function CreatePostPage() {
-  const { authenticateUser, userUpdateProfile } = useAuth();
+  const { authenticateUser, userUpdateProfile, logout } = useAuth();
+  console.log("authenticateUser:", authenticateUser);
   const { startLoading, stopLoading } = useLoading();
   const inputEl = useRef();
   const navigate = useNavigate();
@@ -20,11 +22,16 @@ export default function CreatePostPage() {
   console.log("file:", file);
 
   const [error, setError] = useState({});
+  console.log("error:", error);
+
   const [input, setInput] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    mobile: ""
+    mobile: "",
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: ""
   });
   console.log("inputData:", input);
 
@@ -73,6 +80,40 @@ export default function CreatePostPage() {
     }
   };
 
+  const handleClickUpdatePassword = async () => {
+    try {
+      startLoading();
+      const result = validateUpdatePassword(input);
+      console.log(result, "result------------------------");
+      if (result) {
+        setError(result);
+      } else {
+        console.log("no error");
+        setError({});
+      }
+
+      await userApi.updateUserInfoPassword({
+        ...input,
+        oldPassword: input.oldPassword,
+        newPassword: input.newPassword,
+        confirmPassword: input.confirmPassword
+      });
+
+      toast.success("successfully updated!");
+      stopLoading();
+      logout();
+      navigate("/");
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        setError({ oldPassword: "Invalid old password" });
+        setError({});
+      } else {
+        console.log(err.response?.data.message);
+        toast.error("Failed to update");
+      }
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-red-200 flex justify-center items-center p-2">
       <div className="w-4/5 h-[600px] bg-white flex">
@@ -80,7 +121,7 @@ export default function CreatePostPage() {
           <ul className="flex flex-col justify-center items-start gap-4 p-2">
             <li
               onClick={() => handleMenuClick("Basicinformation")}
-              className={`hover:underline ${
+              className={`cursor-pointer hover:underline ${
                 selectedMenu === "Basicinformation" ? "text-red-500" : ""
               }`}
             >
@@ -88,7 +129,7 @@ export default function CreatePostPage() {
             </li>
             <li
               onClick={() => handleMenuClick("ChangePassword")}
-              className={`hover:underline ${
+              className={`cursor-pointer hover:underline ${
                 selectedMenu === "Basicinformation" ? "" : "text-red-500"
               }`}
             >
@@ -236,10 +277,21 @@ export default function CreatePostPage() {
                       Old Password
                     </label>
                     <input
+                      name="oldPassword"
                       type="password"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Old Password"
+                      value={input.oldPassword}
+                      onChange={handleChangeInput}
                     />
+
+                    {error.oldPassword && (
+                      <div>
+                        <p className="text-red-500">
+                          You entered an incorrect password.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -251,9 +303,18 @@ export default function CreatePostPage() {
                     </label>
                     <input
                       type="password"
+                      name="newPassword"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Old Password"
+                      value={input.newPassword}
+                      onChange={handleChangeInput}
                     />
+
+                    {error.newPassword && (
+                      <div>
+                        <p className="text-red-500">{error.newPassword}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -265,14 +326,24 @@ export default function CreatePostPage() {
                     </label>
                     <input
                       type="password"
+                      name="confirmPassword"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                       placeholder="Old Password"
+                      value={input.confirmPassword}
+                      onChange={handleChangeInput}
                     />
+
+                    {error.confirmPassword && (
+                      <div>
+                        <p className="text-red-500">{error.confirmPassword}</p>
+                      </div>
+                    )}
                   </div>
 
                   <button
                     type="button"
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    onClick={handleClickUpdatePassword}
                   >
                     ยืนยัน
                   </button>

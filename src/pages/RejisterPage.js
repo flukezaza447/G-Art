@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Input from "../components/Input";
 import * as authApi from "../apis/auth-api";
 import useLoading from "../hooks/useLoading";
+import { useNavigate } from "react-router-dom";
 
 const initiaInput = {
   firstName: "",
@@ -17,6 +18,8 @@ const initiaInput = {
 export default function LoginPage() {
   const [input, setInput] = useState(initiaInput);
   console.log("input:", input);
+
+  const navigate = useNavigate();
 
   const [error, setError] = useState({});
   console.log("error:", error);
@@ -40,6 +43,7 @@ export default function LoginPage() {
         await authApi.register(input);
         setInput(initiaInput);
         toast.success("sucess register. please login to continue");
+        navigate("/loginPage");
       }
     } catch (err) {
       // console.log(err, "err");

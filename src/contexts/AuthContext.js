@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { login, getMe } from "../apis/auth-api";
-import { updateProfile } from "../apis/user-api";
+import { updateProfile, updatecoverImage } from "../apis/user-api";
 
 import {
   getAccessToken,
@@ -54,7 +54,8 @@ export default function AuthContextProvider({ children }) {
         authenticateUser,
         userLogin,
         logout,
-        userUpdateProfile
+        userUpdateProfile,
+        setAuthenticatedUser
       }}
     >
       {children}
