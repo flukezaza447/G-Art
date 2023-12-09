@@ -28,7 +28,7 @@ import useLoading from "../hooks/useLoading";
 
 export default function PostDetailPage() {
   const { postId } = useParams();
-  console.log("postId:", postId);
+  // console.log("postId:", postId);
   const { startLoading, stopLoading } = useLoading();
 
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export default function PostDetailPage() {
   // console.log("dataTag:", dataTag);
 
   const [editedComment, setEditedComment] = useState("");
-  // console.log("editedComment:", editedComment);
+  console.log("editedComment:", editedComment);
 
   const { postData, setPostData } = usePost();
   console.log("postData:", postData);
@@ -48,31 +48,34 @@ export default function PostDetailPage() {
   const { authenticateUser } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
 
-  const [followData, setFollowData] = useState([]);
-  // console.log("followData:", followData);
-
   const [selectedComment, setSelectedComment] = useState(null);
   // console.log("selectedComment:", selectedComment);
 
   const [selectedDeleteComment, setSelectedDeleteComment] = useState(null);
-  console.log("selectedDeleteComment:", selectedDeleteComment);
+  // console.log("selectedDeleteComment:", selectedDeleteComment);
+
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const [showModalSuccess, setShowModalSuccess] = useState(false);
-  const [showModalConfirm, setShowModalConfirm] = useState(false);
   const [showModalDeleteComment, setShowModalDeleteComment] = useState(false);
   const [showModalDeletePost, setShowModalDeletePost] = useState(false);
 
   const [postImageId, setPostImageId] = useState([]);
   // console.log("postImageId:", postImageId);
 
-  const selectedPostData = postData?.find(el => el?.id === +postId);
-  // console.log("selectedPostData:", selectedPostData);
+  const [selectedPostData, setSelectedPostData] = useState(null);
+  console.log("selectedPostData:", selectedPostData);
+
+  useEffect(() => {
+    const selectedPost = postData?.find(el => el?.id === +postId);
+    setSelectedPostData(selectedPost);
+  }, [postId, postData]);
 
   const userId = selectedPostData?.User?.id;
-  console.log("userId:", userId);
+  // console.log("userId:", userId);
 
   const tagId = selectedPostData?.Tag?.id;
-  console.log("tagId:", tagId);
+  // console.log("tagId:", tagId);
 
   useEffect(() => {
     const fetchgetCreatePostById = async () => {
@@ -85,38 +88,51 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     const fetchFollow = async () => {
-      const res = await getFollow();
-      // console.log("res:", res.data.pureCreateFollow);
-      setFollowData(res?.data);
+      try {
+        const res = await getFollow();
+
+        const isFollowing =
+          (res?.data?.pureCreateFollow?.length > 0 &&
+            res.data.pureCreateFollow.some(
+              follow =>
+                follow.accepterId === userId &&
+                follow.status === "ALREADYFOLLOW"
+            )) ||
+          (res?.data?.Follows &&
+            res.data.Follows.accepterId === userId &&
+            res.data.Follows.status === "ALREADYFOLLOW");
+
+        setIsFollowing(isFollowing);
+
+        // console.log("isFollowing:", isFollowing);
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     fetchFollow();
-  }, []);
-
-  const isFollowing =
-    followData?.pureCreateFollow &&
-    followData.pureCreateFollow.some(
-      follow =>
-        follow.accepterId === userId && follow.status === "ALREADYFOLLOW"
-    );
+  }, [userId]);
 
   const handleClickFollow = async () => {
     try {
       if (!authenticateUser) {
         navigate("/loginPage");
       }
-      const res = await requestFollow(userId);
-      // console.log("res:", res.data);
-
-      navigate(0);
+      await requestFollow(userId);
+      setIsFollowing(true);
     } catch (err) {
       console.log(err);
     }
   };
 
   const handleClickReject = async () => {
-    await deleteFollow(userId);
-    navigate(0);
+    try {
+      await deleteFollow(userId);
+
+      setIsFollowing(false);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const isUserLiked = selectedPostData?.Likes?.some(
@@ -155,7 +171,7 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleCreatePost = async () => {
+  const handleCreateComment = async () => {
     try {
       const res = await createComment({
         title: title,
@@ -172,7 +188,7 @@ export default function PostDetailPage() {
 
   const handleTextareaKeyDown = e => {
     if (e.key === "Enter") {
-      handleCreatePost();
+      handleCreateComment();
     }
   };
 
@@ -185,8 +201,21 @@ export default function PostDetailPage() {
         id: selectedComment
       });
 
+      const updatedComments = selectedPostData.Comments.map(comment => {
+        if (comment.id === selectedComment) {
+          // ใช้ข้อมูลที่แก้ไขแทนที่ข้อมูลเดิม
+          return { ...comment, title: editedComment };
+        }
+        return comment;
+      });
+
+      setSelectedPostData(prevData => ({
+        ...prevData,
+        Comments: updatedComments
+      }));
+
       setEditedComment("");
-      navigate(0);
+      setSelectedComment(null);
     } catch (err) {
       console.error(err);
     }
@@ -209,11 +238,28 @@ export default function PostDetailPage() {
   };
 
   const handleClickDeleteComment = async () => {
-    await deleteCommentId({
-      id: selectedDeleteComment,
-      userId: userId
-    });
-    navigate(0);
+    try {
+      await deleteCommentId({
+        id: selectedDeleteComment,
+        userId: userId
+      });
+
+      // Filter out the deleted comment from postData
+      setPostData(previousPosts => {
+        const deepClone = structuredClone(previousPosts);
+        const postIndex = deepClone.findIndex(post => post.id === +postId);
+        const updatedComments = deepClone[postIndex].Comments.filter(
+          comment => comment.id !== selectedDeleteComment
+        );
+        deepClone[postIndex].Comments = updatedComments;
+        return deepClone;
+      });
+
+      // Optionally, you can reset the selectedDeleteComment state
+      setSelectedDeleteComment(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -313,7 +359,7 @@ export default function PostDetailPage() {
                         <button
                           type="button"
                           className="w-[250px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
-                          onClick={() => setShowModalConfirm(!showModalConfirm)}
+                          onClick={handleClickReject}
                         >
                           ติดตามแล้ว
                         </button>
@@ -591,16 +637,6 @@ export default function PostDetailPage() {
                 </div>
               ))}
           </div>
-
-          {showModalConfirm && (
-            <ModalConfirmSave
-              isVisible={showModalConfirm}
-              onClose={() => setShowModalConfirm(false)}
-              onSave={handleClickReject}
-              header="เลิกติดตาม"
-              text='คุณต้องการ "เลิกติดตาม" หรือไม่'
-            />
-          )}
 
           {showModalDeleteComment && (
             <ModalConfirmSave

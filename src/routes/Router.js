@@ -8,6 +8,7 @@ import TagPage from "../pages/TagPage";
 import ProfilePage from "../pages/ProfilePage";
 import CreatePostPage from "../pages/CreatePostPage";
 import EditProfilePage from "../pages/EditProfilePage";
+import FollowerUser from "../pages/FollowerUser";
 
 const router = createBrowserRouter([
   {
@@ -22,7 +23,8 @@ const router = createBrowserRouter([
       },
 
       { path: "/createPostPage", element: <CreatePostPage /> },
-      { path: "/editProfilePage", element: <EditProfilePage /> }
+      { path: "/editProfilePage", element: <EditProfilePage /> },
+      { path: "/follower", element: <FollowerUser /> }
     ]
   },
   { path: "/loginPage", element: <LoginPage /> },

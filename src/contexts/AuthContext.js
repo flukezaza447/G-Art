@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { login, getMe } from "../apis/auth-api";
+import { getUserInfoById } from "../apis/user-api";
 import { updateProfile, updatecoverImage } from "../apis/user-api";
 
 import {
@@ -15,7 +16,7 @@ export default function AuthContextProvider({ children }) {
   const [authenticateUser, setAuthenticatedUser] = useState(
     getAccessToken() ? true : null
   );
-  // console.log("authenticateUser", authenticateUser);
+  // console.log("authenticateUser", authenticateUser.id);
 
   useEffect(() => {
     const fetchAuthUser = async () => {

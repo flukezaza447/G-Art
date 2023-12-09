@@ -5,6 +5,7 @@ export const TagContext = createContext();
 
 export default function TagContextProvider({ children }) {
   const [dataTag, setDataTag] = useState([]);
+  // console.log("dataTag:", dataTag);
 
   useEffect(() => {
     const fetchTagData = async () => {

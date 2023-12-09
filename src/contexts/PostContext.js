@@ -8,11 +8,11 @@ export default function PostContextProvider({ children }) {
   // console.log("postData:", postData);
 
   useEffect(() => {
-    const fetchCreateRoom = async () => {
+    const fetchCreatePost = async () => {
       const res = await getDataPost();
       setPostData(res?.data?.pureCreatePost);
     };
-    fetchCreateRoom();
+    fetchCreatePost();
   }, []);
 
   return (

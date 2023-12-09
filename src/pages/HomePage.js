@@ -69,8 +69,6 @@ export default function HomePage() {
       })
     : filteredPosts;
 
-  // const sortedPosts = [...filteredPosts].sort((a, b) => b.id - a.id);
-
   const sortedPosts = [...searchedPosts].sort((a, b) => {
     if (sortByLikes) {
       return b.Likes.length - a.Likes.length;
@@ -119,17 +117,6 @@ export default function HomePage() {
 
         <div>
           <div className="flex">
-            {/* <div className="p-2">
-              {selectedTagId && (
-                <button
-                  className="ml-4 px-2 py-1 bg-gray-300 text-gray-700 rounded-md"
-                  onClick={handleClearFilter}
-                >
-                  {selectedTagId}
-                </button>
-              )}
-            </div> */}
-
             <div className="p-2">
               {sortByLikes && (
                 <button
