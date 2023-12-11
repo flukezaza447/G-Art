@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import { BiSolidLike } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
+import ButtonClear from "../components/ButtonClear";
 
 export default function HomePage() {
   const { postData } = usePost();
@@ -80,9 +81,7 @@ export default function HomePage() {
   return (
     <div className="relative">
       {/* BOX1-TOP */}
-      <div className="flex justify-center items-center p-2 border-b-2">
-        <h1 className="font-bold text-2xl">Logo</h1>
-      </div>
+
       {/* BOX2-CENTER */}
       <div className="w-full flex">
         <nav className="w-[15%] bg-gray-200">
@@ -119,23 +118,13 @@ export default function HomePage() {
           <div className="flex">
             <div className="p-2">
               {sortByLikes && (
-                <button
-                  className="ml-4 px-2 py-1 bg-gray-300 text-gray-700 rounded-md"
-                  onClick={toggleSortByLikes}
-                >
-                  Like
-                </button>
+                <ButtonClear onClick={toggleSortByLikes} title="Like" />
               )}
             </div>
 
             <div className="p-2">
               {getSearch && (
-                <button
-                  className="ml-4 px-2 py-1 bg-gray-300 text-gray-700 rounded-md"
-                  onClick={clearSearch}
-                >
-                  {getSearch}
-                </button>
+                <ButtonClear onClick={clearSearch} getSearch={getSearch} />
               )}
             </div>
           </div>

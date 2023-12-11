@@ -1,9 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { login, getMe } from "../apis/auth-api";
-import { getUserInfoById } from "../apis/user-api";
-import { updateProfile, updatecoverImage } from "../apis/user-api";
-
+import { updateProfile, getUserInfoById } from "../apis/user-api";
 import {
   getAccessToken,
   removeAccessToken,
@@ -17,6 +15,11 @@ export default function AuthContextProvider({ children }) {
     getAccessToken() ? true : null
   );
   // console.log("authenticateUser", authenticateUser.id);
+
+  const [getUserData, setGetUserData] = useState([]);
+  // console.log("getUserData:", getUserData);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchAuthUser = async () => {
@@ -32,6 +35,36 @@ export default function AuthContextProvider({ children }) {
       fetchAuthUser();
     }
   }, []);
+
+  useEffect(() => {
+    const fetchUserInfoById = async () => {
+      try {
+        if (authenticateUser && authenticateUser.id) {
+          const res = await getUserInfoById(authenticateUser.id);
+          // console.log("getUserInfoById", res.data);
+          setGetUserData(res.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchUserInfoById();
+  }, [authenticateUser]);
+
+  const refreshUserData = async () => {
+    try {
+      setIsLoading(true);
+      if (authenticateUser && authenticateUser.id) {
+        const res = await getUserInfoById(authenticateUser.id);
+        setGetUserData(res.data);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const userLogin = async (email, password) => {
     const res = await login({ email, password });
@@ -56,7 +89,11 @@ export default function AuthContextProvider({ children }) {
         userLogin,
         logout,
         userUpdateProfile,
-        setAuthenticatedUser
+        setAuthenticatedUser,
+        getMe,
+        getUserData,
+        setGetUserData,
+        refreshUserData
       }}
     >
       {children}

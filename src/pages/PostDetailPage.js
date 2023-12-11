@@ -6,14 +6,12 @@ import { useState } from "react";
 import {
   unlike,
   createLike,
-  getCreatePostById,
   createComment,
-  getDataPost,
   editComment,
   deleteCommentId,
   deletePost
 } from "../apis/post-api";
-import { requestFollow, deleteFollow, getFollow } from "../apis/follow-api";
+import { requestFollow, deleteFollow } from "../apis/follow-api";
 import { useEffect } from "react";
 import { BiSolidLike } from "react-icons/bi";
 import { RiDeleteBin5Fill } from "react-icons/ri";
@@ -25,6 +23,7 @@ import PostAction from "../feature/postDetailPage.js/PostAction";
 import CardPost from "../components/CardPost";
 import useTag from "../hooks/useTag";
 import useLoading from "../hooks/useLoading";
+import AdminEditPost from "../feature/admin/adminEditPost";
 
 export default function PostDetailPage() {
   const { postId } = useParams();
@@ -40,13 +39,14 @@ export default function PostDetailPage() {
   // console.log("dataTag:", dataTag);
 
   const [editedComment, setEditedComment] = useState("");
-  console.log("editedComment:", editedComment);
+  // console.log("editedComment:", editedComment);
 
   const { postData, setPostData } = usePost();
-  console.log("postData:", postData);
+  // console.log("postData:", postData);
 
-  const { authenticateUser } = useAuth();
+  const { authenticateUser, getUserData, refreshUserData } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
+  console.log("getUserData:", getUserData);
 
   const [selectedComment, setSelectedComment] = useState(null);
   // console.log("selectedComment:", selectedComment);
@@ -60,11 +60,8 @@ export default function PostDetailPage() {
   const [showModalDeleteComment, setShowModalDeleteComment] = useState(false);
   const [showModalDeletePost, setShowModalDeletePost] = useState(false);
 
-  const [postImageId, setPostImageId] = useState([]);
-  // console.log("postImageId:", postImageId);
-
   const [selectedPostData, setSelectedPostData] = useState(null);
-  console.log("selectedPostData:", selectedPostData);
+  // console.log("selectedPostData:", selectedPostData);
 
   useEffect(() => {
     const selectedPost = postData?.find(el => el?.id === +postId);
@@ -78,40 +75,29 @@ export default function PostDetailPage() {
   // console.log("tagId:", tagId);
 
   useEffect(() => {
-    const fetchgetCreatePostById = async () => {
-      const res = await getCreatePostById(userId || null);
-      setPostImageId(res?.data);
-    };
-
-    fetchgetCreatePostById();
-  }, [userId, postData]);
-
-  useEffect(() => {
-    const fetchFollow = async () => {
+    const fetchUserInfoById = async () => {
       try {
-        const res = await getFollow();
+        if (authenticateUser && authenticateUser.id) {
+          const isFollowing =
+            (getUserData.userFollows?.length > 0 &&
+              getUserData.userFollows.some(
+                follow =>
+                  follow.accepterId === userId &&
+                  follow.status === "ALREADYFOLLOW"
+              )) ||
+            (getUserData?.Follows &&
+              getUserData.Follows.accepterId === userId &&
+              getUserData.Follows.status === "ALREADYFOLLOW");
 
-        const isFollowing =
-          (res?.data?.pureCreateFollow?.length > 0 &&
-            res.data.pureCreateFollow.some(
-              follow =>
-                follow.accepterId === userId &&
-                follow.status === "ALREADYFOLLOW"
-            )) ||
-          (res?.data?.Follows &&
-            res.data.Follows.accepterId === userId &&
-            res.data.Follows.status === "ALREADYFOLLOW");
-
-        setIsFollowing(isFollowing);
-
-        // console.log("isFollowing:", isFollowing);
+          setIsFollowing(isFollowing);
+        }
       } catch (err) {
         console.log(err);
       }
     };
 
-    fetchFollow();
-  }, [userId]);
+    fetchUserInfoById();
+  }, [authenticateUser, userId]);
 
   const handleClickFollow = async () => {
     try {
@@ -120,6 +106,7 @@ export default function PostDetailPage() {
       }
       await requestFollow(userId);
       setIsFollowing(true);
+      await refreshUserData();
     } catch (err) {
       console.log(err);
     }
@@ -130,6 +117,7 @@ export default function PostDetailPage() {
       await deleteFollow(userId);
 
       setIsFollowing(false);
+      await refreshUserData();
     } catch (err) {
       console.log(err);
     }
@@ -265,30 +253,11 @@ export default function PostDetailPage() {
   return (
     <div className="">
       {authenticateUser?.isAdmin === true ? (
-        <div className="flex items-center justify-between border-2 mb-10 p-4 bg-gray-400">
-          <div>
-            <h1 className="text-xl font-bold">Admin Edit Post</h1>
-          </div>
-
-          <div>
-            <button
-              type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-              onClick={() => {
-                setShowModalDeletePost(!showModalDeletePost);
-              }}
-            >
-              ยืนยัน
-            </button>
-
-            <button
-              type="button"
-              className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-red-600 rounded-lg border border-gray-200 hover:bg-red-500 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white "
-            >
-              ยกเลิก
-            </button>
-          </div>
-        </div>
+        <AdminEditPost
+          onClick={() => {
+            setShowModalDeletePost(!showModalDeletePost);
+          }}
+        />
       ) : null}
 
       <div className="flex mb-20">

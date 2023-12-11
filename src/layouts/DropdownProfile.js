@@ -2,17 +2,18 @@ import "flowbite";
 import PictureUser from "../assets/blank.png";
 import { FaHouseUser } from "react-icons/fa";
 import { FaBell } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
-import { SlUserFollowing } from "react-icons/sl";
 import useAuth from "../hooks/useAuth";
 import { useRef, useState } from "react";
 
 export default function DropdownProfile() {
   const { logout, authenticateUser } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
+  const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
+
   const menuRef = useRef();
   const imgRef = useRef();
 
@@ -82,7 +83,7 @@ export default function DropdownProfile() {
               className="py-2 text-sm text-gray-700 dark:text-gray-200"
               aria-labelledby="avatarButton"
             >
-              <li onClick={() => setOpen(false)}>
+              <li>
                 <Link
                   to="/profilePage"
                   className="flex items-center gap-3 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
@@ -93,34 +94,13 @@ export default function DropdownProfile() {
                   <p>บัญชีผู้ใช้</p>
                 </Link>
               </li>
-
-              <li>
-                <Link
-                  to="/follower"
-                  className="flex items-center gap-3 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                  <i>
-                    <SlUserFollowing />
-                  </i>
-                  <p>ผู้ติดตาม</p>
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to=""
-                  className="flex items-center gap-3 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                  <i>
-                    <SlUserFollowing />
-                  </i>
-                  <p>ผู้อื่นติดตามเรา</p>
-                </Link>
-              </li>
             </ul>
             <div className="py-1">
               <button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  navigate("/");
+                }}
                 className="w-full flex items-center gap-3 block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
               >
                 <i>

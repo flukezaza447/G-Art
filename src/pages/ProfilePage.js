@@ -10,15 +10,22 @@ import profileImage from "../assets/blank.png";
 import { toast } from "react-toastify";
 import useLoading from "../hooks/useLoading";
 import { updatecoverImage } from "../apis/user-api";
+import Modal from "../components/modal/Modal";
 
 export default function ProfilePage() {
-  const { authenticateUser, setAuthenticatedUser } = useAuth();
-  console.log("authenticateUser:", authenticateUser);
+  const { authenticateUser, setAuthenticatedUser, getUserData } = useAuth();
+  console.log("authenticateUser:", authenticateUser.id);
+  console.log("getUserData:", getUserData);
 
   const { startLoading, stopLoading } = useLoading();
+  const navigate = useNavigate();
 
   const [selectedProfileId, setSelectedProfileId] = useState(null);
-  console.log("selectedProfileId:", selectedProfileId);
+  // console.log("selectedProfileId:", selectedProfileId);
+
+  const [openFollower, setOpenFollower] = useState(false);
+  const [openFollowing, setOpenFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const location = useLocation();
 
@@ -35,7 +42,7 @@ export default function ProfilePage() {
   // console.log("file:", file);
 
   const { postData } = usePost();
-  console.log("postData:", postData);
+  // console.log("postData:", postData);
 
   const userPosts = postData.filter(
     post => post.User.id === authenticateUser.id
@@ -148,7 +155,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex">
-          <div className=" w-2/4 flex flex-col items-center">
+          <div className=" w-2/4 flex flex-col items-center ">
             <div className="absolute w-1/4 h-full z-10 -bottom-60  border-2 border-slate-400 bg-white flex flex-col items-center justify-start p-4 ">
               <div>
                 {displayedUser ? (
@@ -185,20 +192,139 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="w-2/4">
-            <div className="flex justify-center items-center font-bold text-4xl">
-              <h1>Your Post</h1>
+          <div className="w-2/4 flex flex-col gap-4">
+            <div className="border-b-2 flex items-center justify-center gap-20 p-4">
+              <button onClick={() => setOpenFollower(!openFollower)}>
+                <p className="text-xl hover:underline">
+                  {" "}
+                  ผู้ติดตาม{" "}
+                  {
+                    getUserData?.userFollows?.filter(
+                      followData =>
+                        authenticateUser.id === followData.accepterId
+                    ).length
+                  }{" "}
+                  คน
+                </p>
+              </button>
+
+              <button onClick={() => setOpenFollowing(!openFollowing)}>
+                <p className="text-xl hover:underline">
+                  {" "}
+                  กำลังติดตาม{" "}
+                  {
+                    getUserData?.userFollows?.filter(
+                      followData =>
+                        authenticateUser.id === followData.requesterId
+                    ).length
+                  }{" "}
+                  คน
+                </p>
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 p-4">
-              {displayedUserPosts.map((el, idx) => {
-                const postImage = JSON.parse(el.image);
-                return <CardPost key={idx} el={el} postImage={postImage} />;
-              })}
+            <div>
+              <div className="flex justify-center items-center font-bold text-4xl">
+                <h1>Your Post {displayedUserPosts.length}</h1>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-4 p-4">
+                {displayedUserPosts.map((el, idx) => {
+                  const postImage = JSON.parse(el.image);
+                  return <CardPost key={idx} el={el} postImage={postImage} />;
+                })}
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {openFollower && (
+        <Modal
+          header="ผู้ติดตาม"
+          isVisible={openFollower}
+          onClose={() => setOpenFollower(false)}
+        >
+          {getUserData?.userFollows
+            ?.filter(
+              followData => authenticateUser.id === followData.accepterId
+            )
+            .map((followData, index) => (
+              <Link
+                onClick={() => setOpenFollower(false)}
+                to="/profilePage"
+                state={{ id: followData.Requester.id }}
+              >
+                <div
+                  key={index}
+                  className="w-[400px] flex items-center gap-4 p-2 border-b-2"
+                >
+                  <div>
+                    <Avatar
+                      src={followData.Requester.profileImage}
+                      size="60px"
+                    />
+                  </div>
+                  <div className="w-full flex items-center justify-between">
+                    <p>{`${followData.Requester.firstName} ${followData.Requester.lastName}`}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          <div>
+            {getUserData?.userFollows &&
+              !getUserData.userFollows.some(
+                followData => authenticateUser.id === followData.accepterId
+              ) && (
+                <div className="w-[400px]">
+                  <p>ยังไม่มีผู้ติดตาม</p>
+                </div>
+              )}
+          </div>
+        </Modal>
+      )}
+
+      {openFollowing && (
+        <Modal
+          header="กำลังติดตาม"
+          isVisible={openFollowing}
+          onClose={() => setOpenFollowing(false)}
+        >
+          {getUserData?.userFollows
+            ?.filter(
+              followData => authenticateUser.id === followData.requesterId
+            )
+            .map((followData, index) => (
+              <div
+                key={index}
+                className="w-[400px] flex items-center gap-4 p-2 border-b-2"
+              >
+                <div>
+                  <Avatar src={followData.Accepter.profileImage} size="60px" />
+                </div>
+                <div className="w-full flex items-center justify-between">
+                  <p>{`${followData.Accepter.firstName} ${followData.Accepter.lastName}`}</p>
+
+                  <button
+                    type="button"
+                    className="w-[150px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
+                  >
+                    ติดตามแล้ว
+                  </button>
+                </div>
+              </div>
+            ))}
+          <div>
+            {getUserData?.userFollows &&
+              !getUserData.userFollows.some(
+                followData => authenticateUser.id === followData.requesterId
+              ) && (
+                <div className="w-[400px]">
+                  <p>ยังไม่มีผู้ติดตาม</p>
+                </div>
+              )}
+          </div>
+        </Modal>
+      )}
     </>
   );
 }

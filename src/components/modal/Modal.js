@@ -20,12 +20,12 @@ function Modal({ isVisible, width, onClose, header, children }) {
       id="wrapper"
       className="fixed inset-0 bg-black bg-opacity-25 blackdrop-blur-sm flex justify-center items-center"
       onClick={handleClose}
+      style={{ zIndex: 9999 }}
     >
       <div className="overflow-y-auto scrollbar ">
         <div
-          className={`md:w-${
-            width ? width : "[700px]"
-          } w-[100%] h-[700px] mx-auto`}
+          className={`md:w-${width ? width : "[700px]"} 
+          w-[100%] h-[700px] mx-auto`}
         >
           <div className="bg-white  rounded">
             <div className="flex justify-between border-b-2 border-grey-300  p-4">
