@@ -1,12 +1,13 @@
 import { AiOutlineMail, AiFillLock } from "react-icons/ai";
 import Input from "../components/Input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function LoginPage() {
-  const { userLogin } = useAuth();
+  const { userLogin, authenticateUser } = useAuth();
+  console.log("authenticateUser:", authenticateUser);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,8 +18,6 @@ export default function LoginPage() {
     try {
       e.preventDefault();
       await userLogin(email, password);
-      navigate("/");
-
       toast.success("login success");
     } catch (err) {
       console.log(err);
@@ -26,6 +25,13 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    if (authenticateUser && authenticateUser.isAdmin === true) {
+      navigate("/adminPage");
+    } else if (authenticateUser && authenticateUser.isAdmin === false) {
+      navigate("/");
+    }
+  }, [authenticateUser, navigate]);
   return (
     <div className="fixed inset-0 bg-red-200 backdrop-blur-sm flex justify-center items-center">
       <div className="relative w-[400px] h-full max-w-md md:h-auto">

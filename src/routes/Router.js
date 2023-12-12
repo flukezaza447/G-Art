@@ -8,6 +8,8 @@ import TagPage from "../pages/TagPage";
 import ProfilePage from "../pages/ProfilePage";
 import CreatePostPage from "../pages/CreatePostPage";
 import EditProfilePage from "../pages/EditProfilePage";
+import AdminPage from "../pages/AdminPage";
+import RedirectAdmin from "../redirect/RedirectAdmin";
 
 const router = createBrowserRouter([
   {
@@ -22,7 +24,15 @@ const router = createBrowserRouter([
       },
 
       { path: "/createPostPage", element: <CreatePostPage /> },
-      { path: "/editProfilePage", element: <EditProfilePage /> }
+      { path: "/editProfilePage", element: <EditProfilePage /> },
+      {
+        path: "/adminPage",
+        element: (
+          <RedirectAdmin>
+            <AdminPage />
+          </RedirectAdmin>
+        )
+      }
     ]
   },
   { path: "/loginPage", element: <LoginPage /> },
