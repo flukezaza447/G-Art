@@ -1,4 +1,9 @@
-import { AiOutlineMail, AiFillLock } from "react-icons/ai";
+import {
+  AiOutlineMail,
+  AiFillLock,
+  AiFillEye,
+  AiFillEyeInvisible
+} from "react-icons/ai";
 import Input from "../components/Input";
 import { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
@@ -7,10 +12,9 @@ import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const { userLogin, authenticateUser } = useAuth();
-  console.log("authenticateUser:", authenticateUser);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
   const navigate = useNavigate();
 
@@ -32,8 +36,16 @@ export default function LoginPage() {
       navigate("/");
     }
   }, [authenticateUser, navigate]);
+
   return (
-    <div className="fixed inset-0 bg-red-200 backdrop-blur-sm flex justify-center items-center">
+    <div
+      className="fixed inset-0 backdrop-blur-sm flex justify-center items-center bg-cover"
+      style={{
+        backgroundImage:
+          "url('https://media.discordapp.net/attachments/1085571217563602965/1184558186146054154/abstract-background-6m6cjbifu3zpfv84.jpg?ex=658c68c7&is=6579f3c7&hm=9ed778c20f4b34161ae4b9a703e8853efca5fced522cab42a6e57c5ad44fabaa&=&format=webp&width=1191&height=670')",
+        backgroundSize: "cover"
+      }}
+    >
       <div className="relative w-[400px] h-full max-w-md md:h-auto">
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div className="px-6 py-6 lg:px-8">
@@ -53,14 +65,17 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div>
+              <div className="relative flex ">
                 <Input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  titleLabel="password"
+                  titleLabel="Password"
                   icon={<AiFillLock />}
+                  viewPassword={true}
+                  setShowPassword={() => setShowPassword(!showPassword)}
+                  showPassword={showPassword}
                 />
               </div>
 

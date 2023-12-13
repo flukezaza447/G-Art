@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Avatar from "../components/Avatar";
 import useAuth from "../hooks/useAuth";
 import usePost from "../hooks/usePost";
@@ -10,24 +10,29 @@ import profileImage from "../assets/blank.png";
 import { toast } from "react-toastify";
 import useLoading from "../hooks/useLoading";
 import { updatecoverImage } from "../apis/user-api";
+import { requestFollow, deleteFollow } from "../apis/follow-api";
 import Modal from "../components/modal/Modal";
 
 export default function ProfilePage() {
-  const { authenticateUser, setAuthenticatedUser, getUserData } = useAuth();
-  console.log("authenticateUser:", authenticateUser.id);
-  console.log("getUserData:", getUserData);
+  const location = useLocation();
+  const {
+    authenticateUser,
+    setAuthenticatedUser,
+    getUserData,
+    getUsers,
+    refreshUserData
+  } = useAuth();
+  // console.log("authenticateUser:", authenticateUser);
+  // console.log("getUserData:", getUserData);
+  // console.log("getUsers:", getUsers);
 
   const { startLoading, stopLoading } = useLoading();
-  const navigate = useNavigate();
 
   const [selectedProfileId, setSelectedProfileId] = useState(null);
   // console.log("selectedProfileId:", selectedProfileId);
 
   const [openFollower, setOpenFollower] = useState(false);
   const [openFollowing, setOpenFollowing] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
-
-  const location = useLocation();
 
   useEffect(() => {
     if (location.state) {
@@ -86,6 +91,27 @@ export default function ProfilePage() {
     }
   };
 
+  const handleClickFollow = async userId => {
+    try {
+      // console.log("userId:", userId);
+      await requestFollow(userId);
+      await refreshUserData();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleClickReject = async userId => {
+    try {
+      // console.log("userIdReject:", userId);
+
+      await deleteFollow(userId);
+      await refreshUserData();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <>
       <div>
@@ -109,7 +135,7 @@ export default function ProfilePage() {
                 className="text-white"
                 onClick={() => inputEl.current.click()}
               >
-                แก้ไขรุปภาพหน้าปก
+                Edit Cover Photo
               </button>
 
               <input
@@ -156,12 +182,16 @@ export default function ProfilePage() {
 
         <div className="flex">
           <div className=" w-2/4 flex flex-col items-center ">
-            <div className="absolute w-1/4 h-full z-10 -bottom-60  border-2 border-slate-400 bg-white flex flex-col items-center justify-start p-4 ">
+            <div
+              className={`absolute w-1/4 z-2 ${
+                selectedProfileId ? "bottom-60 h-400px] " : "bottom-4"
+              }  border-2 border-slate-400 bg-white flex flex-col items-center justify-start p-4 `}
+            >
               <div>
                 {displayedUser ? (
-                  <Avatar src={displayedUser.profileImage} size="70px" />
+                  <Avatar src={displayedUser.profileImage} size="140px" />
                 ) : (
-                  <Avatar size="70px" />
+                  <Avatar size="140px" />
                 )}
               </div>
 
@@ -174,73 +204,75 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center gap-4">
-                  <h1 className="text-xl font-bold">
-                    {" "}
-                    {displayedUser.firstName} {displayedUser.lastName}
-                  </h1>
+                  <div>
+                    <h1 className="text-2xl font-bold">
+                      {" "}
+                      {displayedUser.firstName} {displayedUser.lastName}
+                    </h1>
+                  </div>
 
-                  <Link to="/editProfilePage">
-                    <button
-                      type="button"
-                      className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                    >
-                      Edit Your Profile
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <button onClick={() => setOpenFollower(!openFollower)}>
+                      <p className="text-xl hover:underline">
+                        {
+                          getUserData?.userFollows?.filter(
+                            followData =>
+                              authenticateUser.id === followData.accepterId
+                          ).length
+                        }{" "}
+                        followers
+                      </p>
                     </button>
-                  </Link>
+
+                    <button onClick={() => setOpenFollowing(!openFollowing)}>
+                      <p className="text-xl hover:underline">
+                        {
+                          getUserData?.userFollows?.filter(
+                            followData =>
+                              authenticateUser.id === followData.requesterId
+                          ).length
+                        }{" "}
+                        following
+                      </p>
+                    </button>
+
+                    <div>
+                      <h className="text-xl">Email : {displayedUser.email}</h>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Link to="/editProfilePage">
+                      <button
+                        type="button"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                      >
+                        Edit Your Profile
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="w-2/4 flex flex-col gap-4">
-            <div className="border-b-2 flex items-center justify-center gap-20 p-4">
-              <button onClick={() => setOpenFollower(!openFollower)}>
-                <p className="text-xl hover:underline">
-                  {" "}
-                  ผู้ติดตาม{" "}
-                  {
-                    getUserData?.userFollows?.filter(
-                      followData =>
-                        authenticateUser.id === followData.accepterId
-                    ).length
-                  }{" "}
-                  คน
-                </p>
-              </button>
-
-              <button onClick={() => setOpenFollowing(!openFollowing)}>
-                <p className="text-xl hover:underline">
-                  {" "}
-                  กำลังติดตาม{" "}
-                  {
-                    getUserData?.userFollows?.filter(
-                      followData =>
-                        authenticateUser.id === followData.requesterId
-                    ).length
-                  }{" "}
-                  คน
-                </p>
-              </button>
+          <div className="w-2/4 flex flex-col mt-6 gap-4">
+            <div className="flex justify-center items-center font-bold text-4xl">
+              <h1>Your Post {displayedUserPosts.length}</h1>
             </div>
 
-            <div>
-              <div className="flex justify-center items-center font-bold text-4xl">
-                <h1>Your Post {displayedUserPosts.length}</h1>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-4 p-4">
-                {displayedUserPosts.map((el, idx) => {
-                  const postImage = JSON.parse(el.image);
-                  return <CardPost key={idx} el={el} postImage={postImage} />;
-                })}
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 p-4">
+              {displayedUserPosts.map((el, idx) => {
+                const postImage = JSON.parse(el.image);
+                return <CardPost key={idx} el={el} postImage={postImage} />;
+              })}
             </div>
           </div>
         </div>
       </div>
       {openFollower && (
         <Modal
-          header="ผู้ติดตาม"
+          header="followers"
           isVisible={openFollower}
           onClose={() => setOpenFollower(false)}
         >
@@ -285,43 +317,65 @@ export default function ProfilePage() {
 
       {openFollowing && (
         <Modal
-          header="กำลังติดตาม"
+          header={` ${
+            getUserData?.userFollows?.filter(
+              followData => authenticateUser.id === followData.requesterId
+            ).length
+          } following`}
           isVisible={openFollowing}
           onClose={() => setOpenFollowing(false)}
         >
-          {getUserData?.userFollows
-            ?.filter(
-              followData => authenticateUser.id === followData.requesterId
-            )
-            .map((followData, index) => (
-              <div
-                key={index}
-                className="w-[400px] flex items-center gap-4 p-2 border-b-2"
-              >
-                <div>
-                  <Avatar src={followData.Accepter.profileImage} size="60px" />
-                </div>
-                <div className="w-full flex items-center justify-between">
-                  <p>{`${followData.Accepter.firstName} ${followData.Accepter.lastName}`}</p>
+          {getUsers.map((user, index) => {
+            if (user.id !== authenticateUser.id) {
+              const isFollowing = getUserData?.userFollows?.some(
+                followData =>
+                  authenticateUser.id === followData.requesterId &&
+                  followData.accepterId === user.id
+              );
 
-                  <button
-                    type="button"
-                    className="w-[150px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
-                  >
-                    ติดตามแล้ว
-                  </button>
+              return (
+                <div
+                  key={index}
+                  className="w-[400px] flex items-center gap-4 p-2 border-b-2"
+                >
+                  <div>
+                    <Avatar src={user.profileImage} size="60px" />
+                  </div>
+                  <div className="w-full flex items-center justify-between">
+                    <p>{`${user.firstName} ${user.lastName}`}</p>
+
+                    {isFollowing ? (
+                      <button
+                        type="button"
+                        className="w-[150px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
+                        onClick={() => handleClickReject(user.id)}
+                      >
+                        ติดตามแล้ว
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="w-[150px] text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
+                        onClick={() => {
+                          handleClickFollow(user.id);
+                        }}
+                      >
+                        ติดตาม
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            }
+            return null;
+          })}
+
           <div>
-            {getUserData?.userFollows &&
-              !getUserData.userFollows.some(
-                followData => authenticateUser.id === followData.requesterId
-              ) && (
-                <div className="w-[400px]">
-                  <p>ยังไม่มีผู้ติดตาม</p>
-                </div>
-              )}
+            {getUsers?.length === 0 && (
+              <div className="w-[400px]">
+                <p>ยังไม่มีผู้ติดตาม</p>
+              </div>
+            )}
           </div>
         </Modal>
       )}

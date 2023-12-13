@@ -8,8 +8,7 @@ import {
   createLike,
   createComment,
   editComment,
-  deleteCommentId,
-  deletePost
+  deleteCommentId
 } from "../apis/post-api";
 import { requestFollow, deleteFollow } from "../apis/follow-api";
 import { useEffect } from "react";
@@ -18,17 +17,13 @@ import { RiDeleteBin5Fill } from "react-icons/ri";
 import { FaCommentAlt } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
 import ModalConfirmSave from "../components/modal/ModalConfirmSave";
-import ModalSuccess from "../components/modal/ModalSuccess";
 import PostAction from "../feature/postDetailPage.js/PostAction";
 import CardPost from "../components/CardPost";
 import useTag from "../hooks/useTag";
-import useLoading from "../hooks/useLoading";
-import AdminEditPost from "../feature/admin/adminEditPost";
 
 export default function PostDetailPage() {
   const { postId } = useParams();
   // console.log("postId:", postId);
-  const { startLoading, stopLoading } = useLoading();
 
   const navigate = useNavigate();
 
@@ -56,9 +51,7 @@ export default function PostDetailPage() {
 
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const [showModalSuccess, setShowModalSuccess] = useState(false);
   const [showModalDeleteComment, setShowModalDeleteComment] = useState(false);
-  const [showModalDeletePost, setShowModalDeletePost] = useState(false);
 
   const [selectedPostData, setSelectedPostData] = useState(null);
   // console.log("selectedPostData:", selectedPostData);
@@ -209,22 +202,6 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleClickDeletePost = async () => {
-    try {
-      startLoading();
-      await deletePost({
-        id: postId,
-        userId: userId,
-        tagId: tagId
-      });
-      stopLoading();
-      await setShowModalSuccess(true);
-      navigate("/");
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const handleClickDeleteComment = async () => {
     try {
       await deleteCommentId({
@@ -252,14 +229,6 @@ export default function PostDetailPage() {
 
   return (
     <div className="">
-      {authenticateUser?.isAdmin === true ? (
-        <AdminEditPost
-          onClick={() => {
-            setShowModalDeletePost(!showModalDeletePost);
-          }}
-        />
-      ) : null}
-
       <div className="flex mb-20">
         {/* BOX-1-left */}
 
@@ -616,19 +585,8 @@ export default function PostDetailPage() {
               text='คุณต้องการ "ลบคอมเมนต์" หรือไม่'
             />
           )}
-
-          {showModalDeletePost && (
-            <ModalConfirmSave
-              isVisible={showModalDeletePost}
-              onClose={() => setShowModalDeletePost(false)}
-              onSave={handleClickDeletePost}
-              header="ลบโพสต์"
-              text='คุณต้องการ "ลบโพสต์" หรือไม่'
-            />
-          )}
         </div>
       </div>
-      {showModalSuccess && <ModalSuccess urlPath="/" />}
     </div>
   );
 }

@@ -1,30 +1,30 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DropdownProfile from "./DropdownProfile";
 import useAuth from "../hooks/useAuth";
 import { useState } from "react";
 
 export default function Header() {
-  const { logout, authenticateUser } = useAuth();
+  const { authenticateUser } = useAuth();
+  const navigate = useNavigate();
 
   const [searchInput, setSearchInput] = useState("");
   // console.log("searchInput:", searchInput);
-
   const handleSearch = e => {
     e.preventDefault();
     setSearchInput("");
   };
 
   return (
-    <div className="border border-b-slate-200">
-      <nav className="flex bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900">
+    <div className="h-[100px] w-full border border-b-slate-200 ">
+      <nav className="w-fll h-full flex bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900">
         {/* BOX-1 left */}
         <div className="container flex justify-start items-center gap-6">
           {/* logo */}
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center items-center gap-4">
             <Link to="/">
               <img
-                src="https://1417094351.rsc.cdn77.org/articles/8850/8849289/thumbnail/large.gif?1"
-                className="h-6 mr-3 sm:h-9 rounded-full"
+                src="https://media.discordapp.net/attachments/1085571217563602965/1184558226524606484/logo.png?ex=658c68d1&is=6579f3d1&hm=d670f14d99d90562d0c83cea83d03cf736ce3ec680862acb943aaebc443f9854&=&format=webp&quality=lossless&width=1000&height=500"
+                className="w-[80px] h-[80px] object-cover rounded-full border-2"
                 alt="Flowbite Logo"
               />
             </Link>
@@ -35,7 +35,13 @@ export default function Header() {
             </Link>
           </div>
 
-          <form className="w-8/12" onSubmit={handleSearch}>
+          <form
+            className="w-8/12"
+            onSubmit={e => {
+              e.preventDefault();
+              navigate("/", { state: searchInput });
+            }}
+          >
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
@@ -49,11 +55,10 @@ export default function Header() {
                 </svg>
               </div>
 
-              <div className="block border-2 w-full h-10 flex items-center justify-between  text-sm text-gray-900 rounded-full bg-gray-50 focus:outline-none focus:ring-0">
+              <div className="block border-2 w-full h-10 flex items-center justify-between text-sm text-gray-900 rounded-full bg-gray-50 focus:outline-none focus:ring-0">
                 <input
                   type="search"
                   id="default-search"
-                  // className="block w-full h-10 p-4 pl-10 text-sm text-gray-900 rounded-full bg-gray-50 focus:outline-none focus:ring-0"
                   className="border-none focus:ring-0 bg-gray-50 border-2 w-full rounded-full"
                   placeholder="Search Post name or Tag name..."
                   required
@@ -61,11 +66,7 @@ export default function Header() {
                   onChange={e => setSearchInput(e.target.value)}
                 />
 
-                <div className="border-2 p-2 bg-blue-700 hover:bg-blue-800 text-white cursor-pointer rounded-full">
-                  <Link to="/" state={searchInput}>
-                    <button type="button">Search</button>
-                  </Link>
-                </div>
+                {/* ปุ่ม Search ไม่จำเป็นต้องมีแล้ว */}
               </div>
             </div>
           </form>

@@ -10,7 +10,7 @@ import validateUpdatePassword from "../validators/validate-updatePassword";
 
 export default function CreatePostPage() {
   const { authenticateUser, userUpdateProfile, logout } = useAuth();
-  console.log("authenticateUser:", authenticateUser);
+  // console.log("authenticateUser:", authenticateUser);
   const { startLoading, stopLoading } = useLoading();
   const inputEl = useRef();
   const navigate = useNavigate();
@@ -19,10 +19,10 @@ export default function CreatePostPage() {
   // console.log("selectedMenu:", selectedMenu);
 
   const [file, setFile] = useState(null);
-  console.log("file:", file);
+  // console.log("file:", file);
 
   const [error, setError] = useState({});
-  console.log("error:", error);
+  // console.log("error:", error);
 
   const [input, setInput] = useState({
     firstName: "",
@@ -58,32 +58,35 @@ export default function CreatePostPage() {
 
       const formData = new FormData();
 
-      // formData.append("profileImage", file);
-
       if (file) {
-        formData.append("profileImage", file);
+        formData.append("profileImage", file, file.name);
       } else {
-        formData.append("profileImage", authenticateUser?.profileImage);
-        console.log(
-          "profileImageCurrent:",
-          formData.append("profileImage", authenticateUser?.profileImage)
-        );
+        const imageUrl = authenticateUser.profileImage;
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const profileImageFile = new File([blob], "existingImage.png");
+        formData.append("profileImage", profileImageFile);
       }
 
-      await userUpdateProfile(formData);
+      const updateProfileResponse = await userUpdateProfile(formData);
 
-      await userApi.updateUserInfo({
-        ...input,
-        firstName: input.firstName || authenticateUser.firstName,
-        lastName: input.lastName || authenticateUser.lastName,
-        email: input.email || authenticateUser.email,
-        mobile: input.mobile || authenticateUser.mobile
-      });
+      if (updateProfileResponse.status === 200) {
+        // Profile update was successful
+        await userApi.updateUserInfo({
+          ...input,
+          firstName: input.firstName || authenticateUser.firstName,
+          lastName: input.lastName || authenticateUser.lastName,
+          email: input.email || authenticateUser.email,
+          mobile: input.mobile || authenticateUser.mobile
+        });
 
-      toast.success("successfully updated!");
-      stopLoading();
-      setFile(null);
-      navigate(0);
+        toast.success("Successfully updated!");
+        stopLoading();
+        setFile(null);
+      } else {
+        console.error("Failed to update profile");
+        toast.error("Failed to update");
+      }
     } catch (err) {
       console.log(err.response?.data.message);
       toast.error("Failed to update");
@@ -124,7 +127,14 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="w-full h-screen bg-red-200 flex justify-center items-center p-2">
+    <div
+      className="w-full h-screen bg-red-200 flex justify-center items-center p-2"
+      style={{
+        backgroundImage:
+          "url('https://media.discordapp.net/attachments/1085571217563602965/1184558186146054154/abstract-background-6m6cjbifu3zpfv84.jpg?ex=658c68c7&is=6579f3c7&hm=9ed778c20f4b34161ae4b9a703e8853efca5fced522cab42a6e57c5ad44fabaa&=&format=webp&width=1191&height=670')",
+        backgroundSize: "cover"
+      }}
+    >
       <div className="w-4/5 h-[600px] bg-white flex">
         <nav className="w-1/5 border-slate-200 border-r-2">
           <ul className="flex flex-col justify-center items-start gap-4 p-2">

@@ -1,3 +1,10 @@
+import {
+  AiOutlineMail,
+  AiFillLock,
+  AiFillEye,
+  AiFillEyeInvisible
+} from "react-icons/ai";
+
 export default function Input({
   type,
   icon,
@@ -5,7 +12,10 @@ export default function Input({
   value,
   onChange,
   error,
-  name
+  name,
+  viewPassword,
+  setShowPassword,
+  showPassword
 }) {
   return (
     <>
@@ -34,7 +44,21 @@ export default function Input({
         </label>
 
         <div>
-          <p className={`${error ? "text-red-600" : ""}`}>{icon}</p>
+          {viewPassword ? (
+            <div>
+              <button
+                type="button"
+                className=" top-2 right-2 text-gray-500 cursor-pointer"
+                onClick={setShowPassword}
+              >
+                {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <p className={`${error ? "text-red-600" : ""}`}>{icon}</p>
+            </div>
+          )}
         </div>
       </div>
       {error && <div className="text-red-600 text-sm">{error}</div>}

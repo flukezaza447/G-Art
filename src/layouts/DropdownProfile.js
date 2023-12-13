@@ -1,7 +1,7 @@
 import "flowbite";
 import PictureUser from "../assets/blank.png";
 import { FaHouseUser } from "react-icons/fa";
-import { FaBell } from "react-icons/fa";
+import { RiAdminFill } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
 import useAuth from "../hooks/useAuth";
@@ -35,10 +35,6 @@ export default function DropdownProfile() {
             Create Post
           </button>
         </Link>
-
-        <button>
-          <FaBell />
-        </button>
       </div>
 
       {/* BOX-right */}
@@ -94,6 +90,20 @@ export default function DropdownProfile() {
                   <p>บัญชีผู้ใช้</p>
                 </Link>
               </li>
+
+              {authenticateUser && authenticateUser.isAdmin === true ? (
+                <li>
+                  <Link
+                    to="/adminPage"
+                    className="flex items-center gap-3 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    <i>
+                      <RiAdminFill />
+                    </i>
+                    <p>Admin</p>
+                  </Link>
+                </li>
+              ) : null}
             </ul>
             <div className="py-1">
               <button

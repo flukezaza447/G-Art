@@ -16,6 +16,8 @@ export default function TagContextProvider({ children }) {
   }, []);
 
   return (
-    <TagContext.Provider value={{ dataTag }}>{children}</TagContext.Provider>
+    <TagContext.Provider value={{ dataTag, setDataTag }}>
+      {children}
+    </TagContext.Provider>
   );
 }
