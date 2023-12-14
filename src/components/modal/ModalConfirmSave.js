@@ -50,7 +50,7 @@ const ModalConfirmSave = ({
                     onClose();
                   }}
                 >
-                  ยกเลิก
+                  Cancel
                 </button>
                 <button
                   className="ml-4 inline-flex justify-center items-center h-full py-2 px-8 bg-red-600 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-text-green hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-800"
@@ -59,7 +59,7 @@ const ModalConfirmSave = ({
                     onClose();
                   }}
                 >
-                  บันทึก
+                  Record
                 </button>
               </div>
             </div>

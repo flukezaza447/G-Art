@@ -41,7 +41,7 @@ export default function PostDetailPage() {
 
   const { authenticateUser, getUserData, refreshUserData } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
-  console.log("getUserData:", getUserData);
+  // console.log("getUserData:", getUserData);
 
   const [selectedComment, setSelectedComment] = useState(null);
   // console.log("selectedComment:", selectedComment);
@@ -237,7 +237,7 @@ export default function PostDetailPage() {
           <div className="w-4/5 flex flex-col gap-5">
             <div>
               <img
-                className="w-full h-[400px] rounded-lg cursor-pointer"
+                className="w-full h-[400px] rounded-lg cursor-pointer object-cover"
                 src={
                   selectedPostData?.image
                     ? JSON.parse(selectedPostData.image)[0]

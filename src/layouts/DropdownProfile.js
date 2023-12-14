@@ -87,7 +87,7 @@ export default function DropdownProfile() {
                   <i>
                     <FaHouseUser />
                   </i>
-                  <p>บัญชีผู้ใช้</p>
+                  <p>User account</p>
                 </Link>
               </li>
 
@@ -116,7 +116,7 @@ export default function DropdownProfile() {
                 <i>
                   <MdLogout />
                 </i>
-                <p>ออกจากระบบ</p>
+                <p>Log out</p>
               </button>
             </div>
           </div>

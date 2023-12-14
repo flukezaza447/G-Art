@@ -353,8 +353,8 @@ export default function AdminPage() {
           isVisible={showModalDeletePost}
           onClose={() => setShowModalDeletePost(false)}
           onSave={handleClickDeletePost}
-          header="ลบโพสต์"
-          text='คุณต้องการ "ลบโพสต์" หรือไม่'
+          header="Delete post"
+          text='Do you want to "delete post"?'
         />
       )}
 
@@ -363,8 +363,8 @@ export default function AdminPage() {
           isVisible={showModalDeleteUser}
           onClose={() => setShowModalDeleteUser(false)}
           onSave={handleClickDeleteUser}
-          header="ลบผู้ใช้งาน"
-          text='คุณต้องการ "ลบผู้ใช้งาน" หรือไม่'
+          header="Delete user"
+          text='Do you want to "delete user"?'
         />
       )}
 
@@ -374,7 +374,7 @@ export default function AdminPage() {
           onClose={() => setShowModalDeleteTag(false)}
           onSave={handleClickDeleteTage}
           header="Delete Tag"
-          text='คุณต้องการ "ลบ" หรือไม่'
+          text='Do you want to "delete" it?'
         />
       )}
 

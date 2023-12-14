@@ -7,8 +7,9 @@ import {
 import Input from "../components/Input";
 import { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 export default function LoginPage() {
   const { userLogin, authenticateUser } = useAuth();
@@ -49,9 +50,21 @@ export default function LoginPage() {
       <div className="relative w-[400px] h-full max-w-md md:h-auto">
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div className="px-6 py-6 lg:px-8">
-            <h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white text-center">
-              Sign in
-            </h3>
+            <div className="flex ">
+              <div className="flex items-center">
+                <Link to="/">
+                  <i className="cursor-pointer text-2xl">
+                    <IoMdArrowRoundBack />
+                  </i>
+                </Link>
+              </div>
+
+              <div className="w-full flex items-center justify-center">
+                <h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white text-center">
+                  Log in
+                </h3>
+              </div>
+            </div>
 
             <form className="space-y-6" action="#" onSubmit={handleSubmitForm}>
               <div>

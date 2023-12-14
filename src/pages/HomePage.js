@@ -165,7 +165,7 @@ export default function HomePage() {
             ) : null}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 z-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 z-0 ">
             {searchedPosts.length > 0 ? (
               searchedPosts.map((el, idx) => <CardPost key={idx} el={el} />)
             ) : (

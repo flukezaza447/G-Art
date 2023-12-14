@@ -23,16 +23,21 @@ export default function ProfilePage() {
     refreshUserData
   } = useAuth();
   // console.log("authenticateUser:", authenticateUser);
-  console.log("getUserData:", getUserData);
-  console.log("getUsers:", getUsers);
+  // console.log("getUserData:", getUserData);
+  // console.log("getUsers:", getUsers);
 
   const { startLoading, stopLoading } = useLoading();
 
   const [selectedProfileId, setSelectedProfileId] = useState(null);
-  // console.log("selectedProfileId:", selectedProfileId);
+  console.log("selectedProfileId:", selectedProfileId);
 
   const [openFollower, setOpenFollower] = useState(false);
   const [openFollowing, setOpenFollowing] = useState(false);
+
+  const selectedUserProfile = getUsers.find(
+    user => user.id === selectedProfileId
+  );
+  console.log("selectedUserProfile:", selectedUserProfile);
 
   useEffect(() => {
     if (location.state) {
@@ -46,7 +51,7 @@ export default function ProfilePage() {
   const [file, setFile] = useState(null);
   // console.log("file:", file);
 
-  const { postData } = usePost();
+  const { postData, setPostData } = usePost();
   // console.log("postData:", postData);
 
   const userPosts = postData.filter(
@@ -61,6 +66,8 @@ export default function ProfilePage() {
   const displayedUserPosts = selectedProfileId
     ? postData.filter(post => post.User.id === selectedProfileId)
     : userPosts;
+
+  // console.log("displayedUser:", displayedUser);
 
   const handleClickSave = async () => {
     try {
@@ -117,7 +124,7 @@ export default function ProfilePage() {
       <div>
         <div className="relative ">
           <img
-            className="w-full h-[400px] object-cover "
+            className="w-full h-[400px] object-cover object-center"
             src={
               file
                 ? URL.createObjectURL(file)
@@ -182,9 +189,9 @@ export default function ProfilePage() {
 
         <div className="flex">
           <div className=" w-2/4 flex flex-col items-center ">
-            <div
+            {/* <div
               className={`absolute w-1/4 z-2 ${
-                selectedProfileId ? "bottom-20 h-400px] " : "bottom-4"
+                selectedProfileId ? "bottom-0 h-400px] " : "bottom-4"
               }  border-2 border-slate-400 bg-white flex flex-col items-center justify-start p-4 `}
             >
               <div>
@@ -197,12 +204,38 @@ export default function ProfilePage() {
 
               {selectedProfileId ? (
                 <div className="flex flex-col justify-center items-center gap-4">
-                  <h1 className="text-xl font-bold">
-                    {" "}
-                    {displayedUser.firstName} {displayedUser.lastName}
-                  </h1>
+                  <div>
+                    <h1 className="text-xl font-bold">
+                      {" "}
+                      {displayedUser.firstName} {displayedUser.lastName}
+                    </h1>
+                  </div>
 
-                  <h1 className="text-xl">Email : {displayedUser.email}</h1>
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <p className="text-xl hover:underline">
+                      {
+                        selectedUserProfile?.Accepter.map(el => el.Accepter)
+                          .length
+                      }{" "}
+                      following
+                    </p>
+
+                    <button onClick={() => setOpenFollowing(!openFollowing)}>
+                      <p className="text-xl hover:underline">
+                        {
+                          selectedUserProfile?.Requester.map(el => el.Requester)
+                            .length
+                        }{" "}
+                        following
+                      </p>
+                    </button>
+
+                    <div>
+                      <h className="text-xl">
+                        Email : {selectedUserProfile.email}
+                      </h>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center gap-4">
@@ -239,7 +272,7 @@ export default function ProfilePage() {
                     </button>
 
                     <div>
-                      <h1 className="text-xl">Email : {displayedUser.email}</h1>
+                      <h className="text-xl">Email : {displayedUser.email}</h>
                     </div>
                   </div>
 
@@ -255,6 +288,74 @@ export default function ProfilePage() {
                   </div>
                 </div>
               )}
+            </div> */}
+
+            <div
+              className={`absolute w-1/4 z-2 bottom-4 border-2 border-slate-400 bg-white flex flex-col items-center justify-start p-4 `}
+            >
+              <div>
+                {displayedUser ? (
+                  <Avatar src={displayedUser.profileImage} size="140px" />
+                ) : (
+                  <Avatar size="140px" />
+                )}
+              </div>
+
+              <div className="flex flex-col justify-center items-center gap-4">
+                <div>
+                  <h1 className="text-xl font-bold">
+                    {" "}
+                    {displayedUser.firstName} {displayedUser.lastName}
+                  </h1>
+                </div>
+
+                <div className="flex flex-col items-center justify-center gap-4">
+                  <button onClick={() => setOpenFollower(!openFollower)}>
+                    <p className="text-xl hover:underline">
+                      {selectedProfileId
+                        ? selectedUserProfile?.Accepter.map(el => el.Accepter)
+                            .length
+                        : getUserData?.userFollows?.filter(
+                            followData =>
+                              authenticateUser.id === followData.accepterId
+                          ).length}{" "}
+                      followers
+                    </p>
+                  </button>
+
+                  <button onClick={() => setOpenFollowing(!openFollowing)}>
+                    <p className="text-xl hover:underline">
+                      {selectedProfileId
+                        ? selectedUserProfile?.Requester.map(el => el.Requester)
+                            .length
+                        : getUserData?.userFollows?.filter(
+                            followData =>
+                              authenticateUser.id === followData.requesterId
+                          ).length}{" "}
+                      following
+                    </p>
+                  </button>
+
+                  <div>
+                    <h1 className="text-xl">Email : {displayedUser.email}</h1>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center items-center gap-4">
+                {!selectedProfileId ? (
+                  <div>
+                    <Link to="/editProfilePage">
+                      <button
+                        type="button"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                      >
+                        Edit Your Profile
+                      </button>
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
 
@@ -274,38 +375,68 @@ export default function ProfilePage() {
       </div>
       {openFollower && (
         <Modal
-          header="followers"
+          header={` ${
+            selectedProfileId
+              ? selectedUserProfile?.Accepter.length
+              : getUserData?.userFollows?.filter(
+                  followData => authenticateUser.id === followData.accepterId
+                ).length
+          } followers`}
           isVisible={openFollower}
           onClose={() => setOpenFollower(false)}
         >
-          {getUserData?.userFollows
-            ?.filter(
-              followData => authenticateUser.id === followData.accepterId
-            )
-            .map((followData, index) => (
-              <Link
-                onClick={() => setOpenFollower(false)}
-                to="/profilePage"
-                state={{ id: followData.Requester.id }}
-              >
-                <div
-                  key={index}
-                  className="w-[400px] flex items-center gap-4 p-2 border-b-2"
-                >
-                  <div>
-                    <Avatar
-                      src={followData.Requester.profileImage}
-                      size="60px"
-                    />
-                  </div>
-                  <div className="w-full flex items-center justify-between">
-                    <p>{`${followData.Requester.firstName} ${followData.Requester.lastName}`}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+          {selectedProfileId
+            ? getUserData?.userFollows
+                ?.filter(
+                  followData => selectedProfileId === followData.accepterId
+                )
+                .map((followData, index) => {
+                  console.log("followData:", followData);
+
+                  return (
+                    <div
+                      key={index}
+                      className="w-[400px] flex items-center gap-4 p-2 border-b-2"
+                    >
+                      <div>
+                        <Avatar
+                          src={followData?.Requester?.profileImage}
+                          size="60px"
+                        />
+                      </div>
+                      <div className="w-full flex items-center justify-between">
+                        <p>{`${followData?.Requester?.firstName} ${followData?.Requester?.lastName}`}</p>
+                      </div>
+                    </div>
+                  );
+                })
+            : getUserData?.userFollows
+                ?.filter(
+                  followData => authenticateUser.id === followData.accepterId
+                )
+                .map((followData, index) => (
+                  <Link
+                    key={index}
+                    onClick={() => setOpenFollower(false)}
+                    to="/profilePage"
+                    state={{ id: followData.Requester.id }}
+                  >
+                    <div className="w-[400px] flex items-center gap-4 p-2 border-b-2">
+                      <div>
+                        <Avatar
+                          src={followData.Requester.profileImage}
+                          size="60px"
+                        />
+                      </div>
+                      <div className="w-full flex items-center justify-between">
+                        <p>{`${followData.Requester.firstName} ${followData.Requester.lastName}`}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
           <div>
-            {getUserData?.userFollows &&
+            {!selectedProfileId &&
+              getUserData?.userFollows &&
               !getUserData.userFollows.some(
                 followData => authenticateUser.id === followData.accepterId
               ) && (
@@ -327,57 +458,54 @@ export default function ProfilePage() {
           isVisible={openFollowing}
           onClose={() => setOpenFollowing(false)}
         >
-          {getUsers.map((user, index) => {
-            if (user.id !== authenticateUser.id) {
-              const isFollowing = getUserData?.userFollows?.some(
-                followData =>
-                  authenticateUser.id === followData.requesterId &&
-                  followData.accepterId === user.id
-              );
-
-              console.log("user--", user);
-              return (
-                <div
-                  key={index}
-                  className="w-[400px] flex items-center gap-4 p-2 border-b-2"
-                >
+          {selectedProfileId
+            ? getUserData?.userFollows
+                ?.filter(
+                  followData => selectedProfileId === followData.accepterId
+                )
+                .map((followData, index) => {
+                  console.log("followData", followData);
+                  return (
+                    <div
+                      key={index}
+                      className="w-[400px] flex items-center gap-4 p-2 border-b-2"
+                    >
+                      <div>
+                        <Avatar
+                          src={followData.Requester.profileImage}
+                          size="60px"
+                        />
+                      </div>
+                      <div className="w-full flex items-center justify-between">
+                        <p>{`${followData.Requester.firstName} ${followData.Requester.lastName}`}</p>
+                      </div>
+                    </div>
+                  );
+                })
+            : getUserData?.userFollows
+                ?.filter(
+                  followData => authenticateUser.id === followData.requesterId
+                )
+                .map((followData, index) => (
                   <Link
-                    onClick={() => setOpenFollowing(false)}
+                    key={index}
+                    onClick={() => setOpenFollower(false)}
                     to="/profilePage"
-                    state={{ id: user.Requester[0]?.Requester.id }}
+                    state={{ id: followData.Requester.id }}
                   >
-                    <div>
-                      <Avatar src={user.profileImage} size="60px" />
+                    <div className="w-[400px] flex items-center gap-4 p-2 border-b-2">
+                      <div>
+                        <Avatar
+                          src={followData.Requester.profileImage}
+                          size="60px"
+                        />
+                      </div>
+                      <div className="w-full flex items-center justify-between">
+                        <p>{`${followData.Requester.firstName} ${followData.Requester.lastName}`}</p>
+                      </div>
                     </div>
                   </Link>
-                  <div className="w-full flex items-center justify-between">
-                    <p>{`${user.firstName} ${user.lastName}`}</p>
-
-                    {isFollowing ? (
-                      <button
-                        type="button"
-                        className="w-[150px] text-white bg-green-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
-                        onClick={() => handleClickReject(user.id)}
-                      >
-                        ติดตามแล้ว
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="w-[150px] text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-full text-sm p-2 text-center me-2 mb-2 "
-                        onClick={() => {
-                          handleClickFollow(user.id);
-                        }}
-                      >
-                        ติดตาม
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            }
-            return null;
-          })}
+                ))}
 
           <div>
             {getUsers?.length === 0 && (

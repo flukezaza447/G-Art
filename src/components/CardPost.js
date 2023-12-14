@@ -14,7 +14,9 @@ export default function CardPost({ el, size, key }) {
         <div>
           <Link to={`/postDetailPage/${el?.id}`}>
             <img
-              className={` ${size ? size : "w-[436px] h-[306px]"} rounded-t-lg`}
+              className={` ${
+                size ? size : "w-[436px] h-[306px]"
+              } rounded-t-lg object-cover`}
               src={JSON.parse(el?.image)[0]}
               alt=""
             />
